@@ -1,0 +1,6 @@
+nifi: 8181
+airflow-webserver: 8282
+namenode: 9870
+spark-master: 8888
+notebook: 8080
+superset: 8088

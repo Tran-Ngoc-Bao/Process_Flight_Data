@@ -1,0 +1,190 @@
+version: '3'
+
+x-airflow-common:
+  &airflow-common
+  image: airflow
+  # build: ./airflow
+  environment:
+    &airflow-common-env
+    AIRFLOW__CORE__EXECUTOR: LocalExecutor
+    AIRFLOW__CORE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
+    AIRFLOW__CORE__FERNET_KEY: ''
+    AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'true'
+    AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
+    AIRFLOW__API__AUTH_BACKEND: 'airflow.api.auth.backend.basic_auth'
+    _PIP_ADDITIONAL_REQUIREMENTS: ${_PIP_ADDITIONAL_REQUIREMENTS:- apache-airflow-providers-microsoft-mssql}
+  volumes:
+    - ./airflow/dags:/opt/airflow/dags
+    - airflow_logs:/opt/airflow/logs
+    - airflow_plugins:/opt/airflow/plugins
+    - airflow_scripts:/opt/airflow/scripts
+    - ./spark/code:/opt/aitflow/code
+  user: "${AIRFLOW_UID:-50000}:${AIRFLOW_GID:-50000}"
+  depends_on:
+    postgres:
+      condition: service_healthy
+  networks:
+    tiki_net:
+
+services:
+  # Nifi
+  nifi:
+    image: apache/nifi
+    container_name: nifi
+    environment:
+      - NIFI_WEB_HTTP_PORT=8181
+    ports:
+      - 8181:8181
+    restart: always
+    volumes:
+      - ./nifi/conf:/opt/nifi/nifi-current/conf
+      - ./nifi/logs:/opt/nifi/nifi-current/logs
+      - ./nifi/provenance_repository:/opt/nifi/nifi-current/provenance_repository
+      - ./nifi/state:/opt/nifi/nifi-current/state
+      - ./nifi/content_repository:/opt/nifi/nifi-current/content_repository
+      - ./nifi/database_repository:/opt/nifi/nifi-current/database_repository
+      - ./nifi/flowfile_repository:/opt/nifi/nifi-current/flowfile_repository
+
+  # Airflow cluster
+  postgres:
+    image: postgres
+    container_name: postgres
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_DB: airflow
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "airflow"]
+      interval: 5s
+      retries: 5
+    restart: always
+    networks:
+      tiki_net:
+    volumes:
+      - postgres-db-volume:/var/lib/postgresql/data
+
+  airflow-webserver:
+    <<: *airflow-common
+    container_name: airflow-webserver
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+    ports:
+      - 8282:8080
+    restart: always
+    command: webserver
+
+  airflow-scheduler:
+    <<: *airflow-common
+    container_name: airflow-scheduler
+    restart: always
+    command: scheduler
+
+  airflow-init:
+    <<: *airflow-common
+    container_name: airflow-init
+    environment:
+      <<: *airflow-common-env
+      _AIRFLOW_DB_UPGRADE: 'true'
+      _AIRFLOW_WWW_USER_CREATE: 'true'
+      _AIRFLOW_WWW_USER_USERNAME: ${_AIRFLOW_WWW_USER_USERNAME:-airflow}
+      _AIRFLOW_WWW_USER_PASSWORD: ${_AIRFLOW_WWW_USER_PASSWORD:-airflow}
+    command: version
+
+  # HDFS cluster
+  namenode:
+    image: bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8
+    container_name: namenode
+    ports:
+      - 9870:9870
+      - 9000:9000
+    environment:
+      - CLUSTER_NAME=test
+    env_file:
+      - ./hadoop/hadoop.env
+    restart: always
+    networks:
+      tiki_net:
+    volumes:
+      - hadoop_home:/home
+      - hadoop_namenode:/hadoop/dfs/name
+
+  datanode:
+    image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
+    container_name: datanode
+    environment:
+      SERVICE_PRECONDITION: "namenode:9870"
+    env_file:
+      - ./hadoop/hadoop.env
+    restart: always
+    networks:
+      tiki_net:
+    volumes:
+      - hadoop_datanode:/hadoop/dfs/data
+
+  # Spark
+  spark:
+    image: spark
+    # build: ./spark
+    container_name: spark
+    environment:
+      - AWS_ACCESS_KEY_ID=admin
+      - AWS_SECRET_ACCESS_KEY=password
+      - AWS_REGION=us-east-1
+    ports:
+      - 8888:8888
+      - 8080:8080
+      - 10000:10000
+      - 10001:10001
+    networks:
+      tiki_net:
+    volumes:
+      - iceberg_warehouse:/home/iceberg/warehouse
+      - iceberg_notebooks:/home/iceberg/notebooks/notebooks
+      - ./spark/code:/home/iceberg/code
+
+  # Other
+  data-warehouse:
+    image: postgres
+    container_name: data-warehouse
+    environment:
+      - POSTGRES_USER=datawarehouse
+      - POSTGRES_PASSWORD=datawarehouse
+      - POSTGRES_DB=datawarehouse
+    ports:
+      - 15432:5432
+    networks:
+      tiki_net:
+    volumes:
+      - data-warehouse:/var/lib/postgresql/data
+
+  superset:
+    image: superset
+    # build: ./superset
+    container_name: superset
+    environment:
+      - SUPERSET_SECRET_KEY=secret
+    ports:
+      - 8088:8088
+    networks:
+      tiki_net:
+    volumes:
+      - superset_data:/app/superset_home
+
+networks:
+  tiki_net:
+  
+volumes:
+  postgres-db-volume:
+  airflow_logs:
+  airflow_plugins:
+  airflow_scripts:
+  hadoop_home:
+  hadoop_namenode:
+  hadoop_datanode:
+  iceberg_warehouse:
+  iceberg_notebooks:
+  data-warehouse:
+  superset_data:
