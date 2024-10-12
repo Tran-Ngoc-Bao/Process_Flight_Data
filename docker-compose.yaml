@@ -2,8 +2,7 @@ version: '3'
 
 x-airflow-common:
   &airflow-common
-  image: airflow
-  # build: ./airflow
+  image: apache/airflow
   environment:
     &airflow-common-env
     AIRFLOW__CORE__EXECUTOR: LocalExecutor
@@ -18,34 +17,16 @@ x-airflow-common:
     - airflow_logs:/opt/airflow/logs
     - airflow_plugins:/opt/airflow/plugins
     - airflow_scripts:/opt/airflow/scripts
-    - ./spark/code:/opt/aitflow/code
+    - ./spark:/opt/airflow/spark
   user: "${AIRFLOW_UID:-50000}:${AIRFLOW_GID:-50000}"
   depends_on:
     postgres:
       condition: service_healthy
   networks:
-    tiki_net:
+    flight_net:
 
 services:
-  # Nifi
-  nifi:
-    image: apache/nifi
-    container_name: nifi
-    environment:
-      - NIFI_WEB_HTTP_PORT=8181
-    ports:
-      - 8181:8181
-    restart: always
-    volumes:
-      - ./nifi/conf:/opt/nifi/nifi-current/conf
-      - ./nifi/logs:/opt/nifi/nifi-current/logs
-      - ./nifi/provenance_repository:/opt/nifi/nifi-current/provenance_repository
-      - ./nifi/state:/opt/nifi/nifi-current/state
-      - ./nifi/content_repository:/opt/nifi/nifi-current/content_repository
-      - ./nifi/database_repository:/opt/nifi/nifi-current/database_repository
-      - ./nifi/flowfile_repository:/opt/nifi/nifi-current/flowfile_repository
-
-  # Airflow cluster
+  # Airflow
   postgres:
     image: postgres
     container_name: postgres
@@ -59,9 +40,9 @@ services:
       retries: 5
     restart: always
     networks:
-      tiki_net:
+      flight_net:
     volumes:
-      - postgres-db-volume:/var/lib/postgresql/data
+      - postgres_db_volume:/var/lib/postgresql/data
 
   airflow-webserver:
     <<: *airflow-common
@@ -93,57 +74,60 @@ services:
       _AIRFLOW_WWW_USER_PASSWORD: ${_AIRFLOW_WWW_USER_PASSWORD:-airflow}
     command: version
 
-  # HDFS cluster
+  # HDFS
   namenode:
     image: bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8
     container_name: namenode
+    restart: always
     ports:
       - 9870:9870
       - 9000:9000
+    volumes:
+      - hadoop_namenode:/hadoop/dfs/name
     environment:
       - CLUSTER_NAME=test
     env_file:
       - ./hadoop/hadoop.env
-    restart: always
-    networks:
-      tiki_net:
-    volumes:
-      - hadoop_home:/home
-      - hadoop_namenode:/hadoop/dfs/name
 
   datanode:
     image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
     container_name: datanode
+    restart: always
+    volumes:
+      - hadoop_datanode:/hadoop/dfs/data
     environment:
       SERVICE_PRECONDITION: "namenode:9870"
     env_file:
       - ./hadoop/hadoop.env
+  
+  resourcemanager:
+    image: bde2020/hadoop-resourcemanager:2.0.0-hadoop3.2.1-java8
+    container_name: resourcemanager
     restart: always
-    networks:
-      tiki_net:
-    volumes:
-      - hadoop_datanode:/hadoop/dfs/data
-
-  # Spark
-  spark:
-    image: spark
-    # build: ./spark
-    container_name: spark
     environment:
-      - AWS_ACCESS_KEY_ID=admin
-      - AWS_SECRET_ACCESS_KEY=password
-      - AWS_REGION=us-east-1
-    ports:
-      - 8888:8888
-      - 8080:8080
-      - 10000:10000
-      - 10001:10001
-    networks:
-      tiki_net:
+      SERVICE_PRECONDITION: "namenode:9000 namenode:9870 datanode:9864"
+    env_file:
+      - ./hadoop/hadoop.env
+
+  nodemanager1:
+    image: bde2020/hadoop-nodemanager:2.0.0-hadoop3.2.1-java8
+    container_name: nodemanager
+    restart: always
+    environment:
+      SERVICE_PRECONDITION: "namenode:9000 namenode:9870 datanode:9864 resourcemanager:8088"
+    env_file:
+      - ./hadoop/hadoop.env
+  
+  historyserver:
+    image: bde2020/hadoop-historyserver:2.0.0-hadoop3.2.1-java8
+    container_name: historyserver
+    restart: always
+    environment:
+      SERVICE_PRECONDITION: "namenode:9000 namenode:9870 datanode:9864 resourcemanager:8088"
     volumes:
-      - iceberg_warehouse:/home/iceberg/warehouse
-      - iceberg_notebooks:/home/iceberg/notebooks/notebooks
-      - ./spark/code:/home/iceberg/code
+      - hadoop_historyserver:/hadoop/yarn/timeline
+    env_file:
+      - ./hadoop/hadoop.env
 
   # Other
   data-warehouse:
@@ -156,12 +140,12 @@ services:
     ports:
       - 15432:5432
     networks:
-      tiki_net:
+      flight_net:
     volumes:
-      - data-warehouse:/var/lib/postgresql/data
+      - data_warehouse:/var/lib/postgresql/data
 
   superset:
-    image: superset
+    image: superset_flight
     # build: ./superset
     container_name: superset
     environment:
@@ -169,22 +153,21 @@ services:
     ports:
       - 8088:8088
     networks:
-      tiki_net:
+      flight_net:
     volumes:
       - superset_data:/app/superset_home
 
 networks:
-  tiki_net:
+  flight_net:
   
 volumes:
-  postgres-db-volume:
+  postgres_db_volume:
   airflow_logs:
   airflow_plugins:
   airflow_scripts:
   hadoop_home:
   hadoop_namenode:
   hadoop_datanode:
-  iceberg_warehouse:
-  iceberg_notebooks:
-  data-warehouse:
+  hadoop_historyserver:
+  data_warehouse:
   superset_data:
