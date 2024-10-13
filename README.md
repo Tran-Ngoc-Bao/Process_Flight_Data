@@ -5,9 +5,8 @@
   <li>Name of project: Build a Data Lake system to analyze flight data on Kaggle</li>
   <li>Project objective:
     <ul>
-      <li></li>
-      <li></li>
-      <li></li>
+      <li>Process flight data on Kaggle with Data Lake system</li>
+      <li>Use Spark SQL and Spark ML to analyze data</li>
     </ul>
   </li>
 </ul>
@@ -41,7 +40,7 @@ apt update && apt install default-jdk
 ./superset/bootstrap-superset.sh
 ```
   
-#### 7. Visualize data in Superset website on local
+#### 7. Visualize data in Superset website
 
 ## Demo
 
