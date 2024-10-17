@@ -1,2 +1,2 @@
-FROM apache/airflow:2.6.0
+FROM apache/airflow
 RUN pip install pyspark

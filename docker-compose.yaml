@@ -2,7 +2,11 @@ version: '3'
 
 x-airflow-common:
   &airflow-common
-  image: apache/airflow
+  image: airflow
+  # build: ./airflow
+  depends_on:
+    postgres:
+      condition: service_healthy
   environment:
     &airflow-common-env
     AIRFLOW__CORE__EXECUTOR: LocalExecutor
@@ -12,18 +16,16 @@ x-airflow-common:
     AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
     AIRFLOW__API__AUTH_BACKEND: 'airflow.api.auth.backend.basic_auth'
     _PIP_ADDITIONAL_REQUIREMENTS: ${_PIP_ADDITIONAL_REQUIREMENTS:- apache-airflow-providers-microsoft-mssql}
+  user: "${AIRFLOW_UID:-50000}:${AIRFLOW_GID:-50000}"
+  networks:
+    flight_net:
   volumes:
     - ./airflow/dags:/opt/airflow/dags
     - airflow_logs:/opt/airflow/logs
     - airflow_plugins:/opt/airflow/plugins
     - airflow_scripts:/opt/airflow/scripts
     - ./spark:/opt/airflow/spark
-  user: "${AIRFLOW_UID:-50000}:${AIRFLOW_GID:-50000}"
-  depends_on:
-    postgres:
-      condition: service_healthy
-  networks:
-    flight_net:
+    - ./airflow/source:/opt/airflow/source
 
 services:
   # Airflow
@@ -53,7 +55,7 @@ services:
       timeout: 10s
       retries: 5
     ports:
-      - 8282:8080
+      - 8080:8080
     restart: always
     command: webserver
 
@@ -78,56 +80,68 @@ services:
   namenode:
     image: bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8
     container_name: namenode
-    restart: always
-    ports:
-      - 9870:9870
-      - 9000:9000
-    volumes:
-      - hadoop_namenode:/hadoop/dfs/name
     environment:
       - CLUSTER_NAME=test
     env_file:
       - ./hadoop/hadoop.env
+    ports:
+      - 9870:9870
+      - 9000:9000
+    restart: always
+    networks:
+      flight_net:
+    volumes:
+      - hadoop_namenode:/hadoop/dfs/name
 
   datanode:
     image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
     container_name: datanode
-    restart: always
-    volumes:
-      - hadoop_datanode:/hadoop/dfs/data
     environment:
       SERVICE_PRECONDITION: "namenode:9870"
     env_file:
       - ./hadoop/hadoop.env
+    restart: always
+    networks:
+      flight_net:
+    volumes:
+      - hadoop_datanode:/hadoop/dfs/data
   
   resourcemanager:
     image: bde2020/hadoop-resourcemanager:2.0.0-hadoop3.2.1-java8
     container_name: resourcemanager
-    restart: always
     environment:
       SERVICE_PRECONDITION: "namenode:9000 namenode:9870 datanode:9864"
     env_file:
       - ./hadoop/hadoop.env
+    ports:
+      - 8888:8080
+    restart: always
+    networks:
+      flight_net:
 
   nodemanager1:
     image: bde2020/hadoop-nodemanager:2.0.0-hadoop3.2.1-java8
     container_name: nodemanager
-    restart: always
     environment:
       SERVICE_PRECONDITION: "namenode:9000 namenode:9870 datanode:9864 resourcemanager:8088"
     env_file:
       - ./hadoop/hadoop.env
+    restart: always
+    networks:
+      flight_net:
   
   historyserver:
     image: bde2020/hadoop-historyserver:2.0.0-hadoop3.2.1-java8
     container_name: historyserver
-    restart: always
     environment:
       SERVICE_PRECONDITION: "namenode:9000 namenode:9870 datanode:9864 resourcemanager:8088"
-    volumes:
-      - hadoop_historyserver:/hadoop/yarn/timeline
     env_file:
       - ./hadoop/hadoop.env
+    restart: always
+    networks:
+      flight_net:
+    volumes:
+      - hadoop_historyserver:/hadoop/yarn/timeline
 
   # Other
   data-warehouse:
