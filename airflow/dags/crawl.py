@@ -15,8 +15,7 @@ default_args = {
     "retry_delay": timedelta(minutes = 1),
 }
 
-# dag = DAG("main", default_args = default_args, schedule_interval = "0 3,4,7,8 * * *")
-dag = DAG("main", default_args = default_args, schedule_interval = timedelta(30))
+dag = DAG("main", default_args = default_args, schedule_interval = timedelta(1))
 
 def check_leap_year(y):
     yi = int(y)
@@ -43,8 +42,9 @@ def increase_time(y, m, d):
     return y + " " + m + " " + str(di + 1)
 
 def solution():
-    f = open("/opt/airflow/source/time.txt", "r+")
+    f = open("/opt/airflow/source/time.txt", "r")
     s = f.read().split(" ")
+    f.close()
     year = s[0]
     month = s[1]
     day = s[2]
@@ -54,7 +54,7 @@ def solution():
     result = df.filter("DayofMonth = {}".format(day))
     result.repartition(1).write.mode("append").parquet("hdfs://namenode:9000/" + year + "/" + month)
 
-    f.seek(0)
+    f = open("/opt/airflow/source/time.txt", "w")
     f.write(increase_time(year, month, day))
     f.close()
 
