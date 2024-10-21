@@ -12,10 +12,10 @@ default_args = {
     "email_on_failure": False,
     "email_on_retry": False,
     "retries": 3,
-    "retry_delay": timedelta(minutes = 1),
+    "retry_delay": timedelta(minutes=1),
 }
 
-dag = DAG("main", default_args = default_args, schedule_interval = timedelta(1))
+dag = DAG("main", default_args=default_args, schedule_interval=timedelta(1))
 
 def check_leap_year(y):
     yi = int(y)
@@ -59,9 +59,9 @@ def solution():
     f.close()
 
 crawl_data = PythonOperator(
-    task_id = "crawl_data",
-    python_callable = solution, 
-    dag = dag
+    task_id="crawl_data",
+    python_callable=solution,
+    dag=dag
 )
 
 crawl_data
