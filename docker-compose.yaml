@@ -137,6 +137,8 @@ services:
       SERVICE_PRECONDITION: "namenode:9000 namenode:9870 datanode:9864 resourcemanager:8088"
     env_file:
       - ./hadoop/hadoop.env
+    ports:
+      - 8188:8188
     restart: always
     networks:
       flight_net:
@@ -151,8 +153,6 @@ services:
       - POSTGRES_USER=datawarehouse
       - POSTGRES_PASSWORD=datawarehouse
       - POSTGRES_DB=datawarehouse
-    ports:
-      - 15432:5432
     networks:
       flight_net:
     volumes:
