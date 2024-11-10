@@ -119,7 +119,7 @@ services:
     networks:
       flight_net:
 
-  nodemanager1:
+  nodemanager:
     image: bde2020/hadoop-nodemanager:2.0.0-hadoop3.2.1-java8
     container_name: nodemanager
     environment:
@@ -145,21 +145,42 @@ services:
     volumes:
       - hadoop_historyserver:/hadoop/yarn/timeline
 
-  # Other
-  data-warehouse:
-    image: postgres
-    container_name: data-warehouse
-    environment:
-      - POSTGRES_USER=datawarehouse
-      - POSTGRES_PASSWORD=datawarehouse
-      - POSTGRES_DB=datawarehouse
+  # Data Warehouse
+  trino:
+    image: trinodb/trino:457
+    container_name: trino
+    ports:
+      - 8383:8080
     networks:
       flight_net:
     volumes:
-      - data_warehouse:/var/lib/postgresql/data
+      - ./trino/etc:/usr/lib/trino/etc:ro
+      - ./trino/catalog:/etc/trino/catalog
 
+  hive-metastore-postgresql:
+    image: bde2020/hive-metastore-postgresql:2.3.0
+    container_name: hive-metastore-postgresql
+    networks:
+      flight_net:
+    volumes:
+      - hive_metastore_postgresql:/var/lib/postgresql/data
+
+  hive-metastore:
+    image: bde2020/hive:2.3.2-postgresql-metastore
+    container_name: hive-metastore
+    environment:
+      SERVICE_PRECONDITION: "hive-metastore-postgresql:5432"
+    env_file:
+      - ./hadoop/hadoop-hive.env
+    ports:
+      - 9083:9083
+    command: /opt/hive/bin/hive --service metastore
+    networks:
+      flight_net:
+
+  # Superset
   superset:
-    image: superset_flight
+    image: superset
     # build: ./superset
     container_name: superset
     environment:
@@ -179,9 +200,8 @@ volumes:
   airflow_logs:
   airflow_plugins:
   airflow_scripts:
-  hadoop_home:
   hadoop_namenode:
   hadoop_datanode:
   hadoop_historyserver:
-  data_warehouse:
+  hive_metastore_postgresql:
   superset_data:

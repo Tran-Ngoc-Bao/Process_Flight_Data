@@ -31,16 +31,21 @@ docker build ./superset -t superset_flight
 docker compose up -d
 ```
 
-#### 3. Start DAG on Airflow cluster
+#### 3. Set Trino in Airflow cluster
+```sh
+docker exec -u root -it airflow-webserver chmod +x /opt/airflow/source/trino; docker exec -u root -it airflow-scheduler chmod +x /opt/airflow/source/trino
+```
 
-#### 4. Build enviroment Superset
+#### 4. Start DAG on Airflow webserver
+
+#### 5. Build enviroment Superset
 ```sh
 ./superset/bootstrap-superset.sh
 ```
   
-#### 5. Visualize data in Superset with SQLalchemy uri
+#### 6. Visualize data in Superset with SQLalchemy uri
 ```
-postgresql://datawarehouse:datawarehouse@data-warehouse:5432/datawarehouse
+trino://hive@trino:8080/hive
 ```
 
 ## Demo

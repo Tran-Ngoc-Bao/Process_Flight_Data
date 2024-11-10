@@ -33,7 +33,7 @@ def solution():
     day = s[2]
 
     df = spark.read.parquet("/opt/airflow/source/flight_data/" + year + "/" + month + "/" + day + ".parquet")
-    df.repartition(1).write.mode("append").parquet("hdfs://namenode:9000/" + year + "/" + month)
+    df.repartition(1).write.mode("append").parquet("hdfs://namenode:9000/inprogress/" + year + "/" + month)
 
     f = open("/opt/airflow/source/time.txt", "w")
     f.write(increase_time(year, month, day))

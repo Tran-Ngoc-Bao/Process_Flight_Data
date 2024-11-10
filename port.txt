@@ -2,4 +2,5 @@ airflow-webserver: 8080
 namenode: 9870
 yarn: 8888
 historyserver: 8188
+trino: 8383
 superset: 8088
