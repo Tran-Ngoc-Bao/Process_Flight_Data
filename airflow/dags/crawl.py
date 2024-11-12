@@ -52,7 +52,7 @@ def solution():
     spark = SparkSession.builder.appName("Hello").getOrCreate()
     df = spark.read.options(header='True', inferSchema='True', delimiter=',').csv("/opt/airflow/source/flight_data/raw/Flights_" + year + "_" + month + ".csv")
     result = df.filter("DayofMonth = {}".format(day))
-    result.repartition(1).write.mode("append").parquet("hdfs://namenode:9000/" + year + "/" + month)
+    result.repartition(1).write.mode("append").parquet("hdfs://namenode:9000/inprogress/" + year + "/" + month)
 
     f = open("/opt/airflow/source/time.txt", "w")
     f.write(increase_time(year, month, day))

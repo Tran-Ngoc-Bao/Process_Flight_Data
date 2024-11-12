@@ -1,2 +1,3 @@
 airflow/source/flight_data/
 airflow/source/spark/
+airflow/source/hadoop/
