@@ -23,7 +23,7 @@ docker pull postgres bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8 bde2020/had
 docker build ./airflow -t airflow
 ```
 ```sh
-docker build ./superset -t superset_flight
+docker build ./superset -t superset
 ```
 
 #### 2. Start system
@@ -31,19 +31,25 @@ docker build ./superset -t superset_flight
 docker compose up -d
 ```
 
-#### 3. Set Trino in Airflow cluster
+#### 3. Set Spark & Yarn on airflow-webserver, similar to airflow-scheduler
+```sh
+docker exec -it airflow-webserver bash
+source /opt/airflow/source/env.sh
+```
+
+#### 4. Set Trino on Airflow cluster
 ```sh
 docker exec -u root -it airflow-webserver chmod +x /opt/airflow/source/trino; docker exec -u root -it airflow-scheduler chmod +x /opt/airflow/source/trino
 ```
 
-#### 4. Start DAG on Airflow webserver
+#### 5. Start DAG on Airflow webserver
 
-#### 5. Build enviroment Superset
+#### 6. Build enviroment Superset
 ```sh
 ./superset/bootstrap-superset.sh
 ```
   
-#### 6. Visualize data in Superset with SQLalchemy uri
+#### 7. Visualize data on Superset with SQLalchemy uri
 ```
 trino://hive@trino:8080/hive
 ```
