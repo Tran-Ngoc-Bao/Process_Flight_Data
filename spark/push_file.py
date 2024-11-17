@@ -33,13 +33,17 @@ def solution():
     day = s[2]
 
     df = spark.read.parquet("/opt/airflow/source/flight_data/" + year + "/" + month + "/" + day + ".parquet")
-    df.repartition(1).write.mode("append").parquet("hdfs://namenode:9000/inprogress/" + year + "/" + month)
+    df_reference_data = df.select("Origin", "OriginCityname", "OriginState", "OriginStateName", "Dest", "DestCityName", "DestState", "DestStateName",
+                                  "Year", "Quarter", "Month", "DayofMonth", "DayOfWeek", "FlightDate").distinct()
+    df_transaction_data = df.drop("OriginCityname", "OriginStateName", "DestCityName", "DestStateName")
+    df_reference_data.repartition(1).write.mode("overwrite").parquet("hdfs://namenode:9000/staging/reference/" + year + "/" + month + "/" + day)
+    df_transaction_data.repartition(1).write.mode("overwrite").parquet("hdfs://namenode:9000/staging/transaction/" + year + "/" + month + "/" + day)
 
     f = open("/opt/airflow/source/time.txt", "w")
     f.write(increase_time(year, month, day))
     f.close()
 
 if __name__ == "__main__":
-    spark = SparkSession.builder.appName("Hello").getOrCreate()
+    spark = SparkSession.builder.appName("Push file").getOrCreate()
     while(1):
         solution()

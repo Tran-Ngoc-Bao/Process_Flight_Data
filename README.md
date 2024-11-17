@@ -31,25 +31,19 @@ docker build ./superset -t superset
 docker compose up -d
 ```
 
-#### 3. Set Spark & Yarn on airflow-webserver, similar to airflow-scheduler
-```sh
-docker exec -it airflow-webserver bash
-source /opt/airflow/source/env.sh
-```
-
-#### 4. Set Trino on Airflow cluster
+#### 3. Set Trino on Airflow cluster
 ```sh
 docker exec -u root -it airflow-webserver chmod +x /opt/airflow/source/trino; docker exec -u root -it airflow-scheduler chmod +x /opt/airflow/source/trino
 ```
 
-#### 5. Start DAG on Airflow webserver
+#### 4. Start DAG on Airflow webserver
 
-#### 6. Build enviroment Superset
+#### 5. Build enviroment Superset
 ```sh
 ./superset/bootstrap-superset.sh
 ```
   
-#### 7. Visualize data on Superset with SQLalchemy uri
+#### 6. Visualize data on Superset with SQLalchemy uri
 ```
 trino://hive@trino:8080/hive
 ```
