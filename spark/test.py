@@ -1,5 +1,5 @@
-import pandas
+from pyspark.sql import SparkSession
 
 if __name__ == "__main__":
-    df = pandas.read_parquet("./airflow/source/flight_data/added_key/2018/1/1.parquet")
-    print(df["id"][1])
+    spark = SparkSession.builder.appName("Test").getOrCreate()
+    df = spark.read.parquet("hdfs://namenode:9000/staging/transaction/2018/1/1").printSchema()

@@ -36,9 +36,9 @@ def solution():
     df = pandas.read_parquet("./airflow/source/flight_data/" + year + "/" + month + "/" + day + ".parquet")
     num_of_rows = len(df)
     keys = []
-    head = (int(year) - 2000) * 48000000 + int(month) * 4000000 + int(day) * 100000
+    head = int(year) * 10000000000 + int(month) * 100000000 + int(day) * 1000000
     for i in range(num_of_rows):
-        keys.append(head + i)
+        keys.append(str(head + i))
     keys_df = pandas.DataFrame(keys, columns=["id"])
     result = pandas.concat([df, keys_df], axis=1)
 

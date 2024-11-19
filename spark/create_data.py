@@ -48,5 +48,8 @@ def solution():
     f.close()
 
 if __name__ == "__main__":
-    while(1):
-        solution()
+    while True:
+        try:
+            solution()
+        except:
+            print("Don't worry about this error")

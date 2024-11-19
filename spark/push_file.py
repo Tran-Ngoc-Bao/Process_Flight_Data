@@ -32,7 +32,7 @@ def solution():
     month = s[1]
     day = s[2]
 
-    df = spark.read.parquet("/opt/airflow/source/flight_data/" + year + "/" + month + "/" + day + ".parquet")
+    df = spark.read.parquet("/opt/airflow/source/flight_data/added_key/" + year + "/" + month + "/" + day + ".parquet")
     df_reference_data = df.select("Origin", "OriginCityname", "OriginState", "OriginStateName", "Dest", "DestCityName", "DestState", "DestStateName",
                                   "Year", "Quarter", "Month", "DayofMonth", "DayOfWeek", "FlightDate").distinct()
     df_transaction_data = df.drop("OriginCityname", "OriginStateName", "DestCityName", "DestStateName")
@@ -45,5 +45,8 @@ def solution():
 
 if __name__ == "__main__":
     spark = SparkSession.builder.appName("Push file").getOrCreate()
-    while(1):
-        solution()
+    while True:
+        try:
+            solution()
+        except:
+            print("Don't worry about this error")
