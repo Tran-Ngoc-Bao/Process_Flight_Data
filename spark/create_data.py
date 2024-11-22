@@ -48,8 +48,10 @@ def solution():
     f.close()
 
 if __name__ == "__main__":
-    while True:
+    flag = True
+    while flag:
         try:
             solution()
         except:
             print("Don't worry about this error")
+            flag = False

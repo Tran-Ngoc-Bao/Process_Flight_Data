@@ -68,7 +68,7 @@ if __name__ == "__main__":
     
     spark.sql("""create table if not exists sat_arrival
               (hash_key varchar(255), load_date varchar(255), record_source varchar(255),
-              crs_arr_time double, arr_time double, arr_delay double, arr_delay_minutes double, arr_del_15 double, arrarture_delay_groups double, arr_time_blk varchar(255))""")
+              crs_arr_time double, arr_time double, arr_delay double, arr_delay_minutes double, arr_del_15 double, arrival_delay_groups double, arr_time_blk varchar(255))""")
     
     spark.sql("""create table if not exists sat_cancelled
               (hash_key varchar(255), load_date varchar(255), record_source varchar(255),

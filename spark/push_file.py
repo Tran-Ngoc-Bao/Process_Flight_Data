@@ -45,8 +45,10 @@ def solution():
 
 if __name__ == "__main__":
     spark = SparkSession.builder.appName("Push file").getOrCreate()
-    while True:
+    flag = True
+    while flag:
         try:
             solution()
         except:
             print("Don't worry about this error")
+            flag = False
