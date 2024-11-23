@@ -20,12 +20,14 @@ x-airflow-common:
   networks:
     flight_net:
   volumes:
-    - ./airflow/dags:/opt/airflow/dags
     - airflow_logs:/opt/airflow/logs
     - airflow_plugins:/opt/airflow/plugins
     - airflow_scripts:/opt/airflow/scripts
-    - ./spark:/opt/airflow/spark
+    - ./airflow/dags:/opt/airflow/dags
     - ./airflow/source:/opt/airflow/source
+    - ./spark:/opt/airflow/spark
+    - ./sql:/opt/airflow/sql
+
 
 services:
   # Airflow

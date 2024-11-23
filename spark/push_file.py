@@ -33,8 +33,7 @@ def solution():
     day = s[2]
 
     df = spark.read.parquet("/opt/airflow/source/flight_data/added_key/" + year + "/" + month + "/" + day + ".parquet")
-    df_reference_data = df.select("Origin", "OriginCityname", "OriginState", "OriginStateName", "Dest", "DestCityName", "DestState", "DestStateName",
-                                  "Year", "Quarter", "Month", "DayofMonth", "DayOfWeek", "FlightDate").distinct()
+    df_reference_data = df.select("Origin", "OriginCityname", "OriginState", "OriginStateName", "Dest", "DestCityName", "DestState", "DestStateName", "FlightDate")
     df_transaction_data = df.drop("OriginCityname", "OriginStateName", "DestCityName", "DestStateName")
     df_reference_data.repartition(1).write.mode("overwrite").parquet("hdfs://namenode:9000/staging/reference/" + year + "/" + month + "/" + day)
     df_transaction_data.repartition(1).write.mode("overwrite").parquet("hdfs://namenode:9000/staging/transaction/" + year + "/" + month + "/" + day)
@@ -52,3 +51,4 @@ if __name__ == "__main__":
         except:
             print("Don't worry about this error")
             flag = False
+    # solution()

@@ -94,16 +94,16 @@ if __name__ == "__main__":
     # Link
     spark.sql("""create table if not exists lnk_flight_origin
               (hash_key varchar(255), load_date varchar(255), record_source varchar(255),
-              hash_key_flight varchar(255), has_key_origin varchar(255))""")
+              hash_key_flight varchar(255), hash_key_origin varchar(255))""")
 
     spark.sql("""create table if not exists lnk_flight_origin_state
               (hash_key varchar(255), load_date varchar(255), record_source varchar(255),
-              hash_key_flight varchar(255), has_key_origin_state varchar(255))""")
+              hash_key_flight varchar(255), hash_key_origin_state varchar(255))""")
     
     spark.sql("""create table if not exists lnk_flight_dest
               (hash_key varchar(255), load_date varchar(255), record_source varchar(255),
-              hash_key_flight varchar(255), has_key_dest varchar(255))""")
+              hash_key_flight varchar(255), hash_key_dest varchar(255))""")
     
     spark.sql("""create table if not exists lnk_flight_dest_state
               (hash_key varchar(255), load_date varchar(255), record_source varchar(255),
-              hash_key_flight varchar(255), has_key_dest_state varchar(255))""")
+              hash_key_flight varchar(255), hash_key_dest_state varchar(255))""")

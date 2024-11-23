@@ -32,34 +32,6 @@ def increase_time():
         day += 1
 
 def solution():
-    # Reference data solution
-    df_ref = spark.read.parquet("hdfs://namenode:9000/staging/reference/" + str(year) + "/" + str(month) + "/" + str(day))
-    df_tmp_ref = df_ref.withColumn("hash_key_origin", sha2("Origin", 256)).withColumn("hash_key_origin_state", sha2("OriginState", 256)).withColumn("hash_key_dest", sha2("Dest", 256)).withColumn("hash_key_dest_state", sha2("DestState", 256))
-    df_tmp_ref.createOrReplaceTempView("view_tmp_ref")
-
-    spark.sql("insert into table hub_origin select distinct hash_key_origin as hash_key, FlightDate as load_date, 'reference data' as record_source from view_tmp_ref")
-    spark.sql("insert into table hub_origin_state select distinct hash_key_origin_state as hash_key, FlightDate as load_date, 'reference data' as record_source from view_tmp_ref")
-    spark.sql("insert into table hub_dest select distinct hash_key_dest as hash_key, FlightDate as load_date, 'reference data' as record_source from view_tmp_ref")
-    spark.sql("insert into table hub_dest_state select distinct hash_key_dest_state as hash_key, FlightDate as load_date, 'reference data' as record_source from view_tmp_ref")
-
-    spark.sql("""insert into table sat_origin
-              select distinct hash_key_origin as hash_key, FlightDate as load_date, 'reference data' as record_source,
-              Origin as origin, OriginCityName as origin_city_name, FlightDate as flight_date
-              from view_tmp_ref""")
-    spark.sql("""insert into table sat_origin_state
-              select distinct hash_key_origin_state as hash_key, FlightDate as load_date, 'reference data' as record_source,
-              OriginState as origin_state, OriginStateName as origin_state_name, FlightDate as flight_date
-              from view_tmp_ref""")
-    spark.sql("""insert into table sat_dest
-              select distinct hash_key_dest as hash_key, FlightDate as load_date, 'reference data' as record_source,
-              Dest as dest, DestCityName as dest_city_name, FlightDate as flight_date
-              from view_tmp_ref""")
-    spark.sql("""insert into table sat_dest_state
-              select distinct hash_key_dest_state as hash_key, FlightDate as load_date, 'reference data' as record_source,
-              DestState as dest_state, DestStateName as dest_state_name, FlightDate as flight_date
-              from view_tmp_ref""")
-    
-    # Transaction data solution
     df_tran = spark.read.parquet("hdfs://namenode:9000/staging/transaction/" + str(year) + "/" + str(month) + "/" + str(day))
     df_tmp_tran = df_tran.withColumn("hash_key", sha2("id", 256))
     df_tmp_tran.createOrReplaceTempView("view_tmp_tran")
@@ -130,38 +102,12 @@ def solution():
               select hash_key, FlightDate as load_date, 'transaction data' as record_source,
               Year as year, Quarter as quarter, DayofMonth as day_of_month, DayOfWeek as day_of_week, FlightDate as flight_date
               from view_tmp_tran""")
-    
-    # Link solution
-    df_tmp_tran_flight = df_tmp_tran.select(col("hash_key").alias("hash_key_flight"), "Origin", "OriginState", "Dest", "DestState", "FlightDate")
-    df_lnk_tran_flight = df_tmp_tran_flight.withColumn("hash_key_origin", sha2("Origin", 256)).withColumn("hash_key_origin_state", sha2("OriginState", 256)).withColumn("hash_key_dest", sha2("Dest", 256)).withColumn("hash_key_dest_state", sha2("DestState", 256))
-    df_lnk_tran_flight_final = df_lnk_tran_flight.withColumn("hash_key_flight_origin", sha2(concat("hash_key_flight", "hash_key_origin"), 256)).withColumn("hash_key_flight_origin_state", sha2(concat("hash_key_flight", "hash_key_origin_state"), 256)).withColumn("hash_key_flight_dest", sha2(concat("hash_key_flight", "hash_key_dest"), 256)).withColumn("hash_key_flight_dest_state", sha2(concat("hash_key_flight", "hash_key_dest_state"), 256))
-    df_lnk_tran_flight_final.createOrReplaceTempView("view_lnk_tran_flight_final")
-
-    spark.sql("""insert into table lnk_flight_origin
-              select hash_key_flight_origin as hash_key, FlightDate as load_date, 'reference data, transaction data' as record_source,
-              hash_key_flight, hash_key_origin
-              from view_lnk_tran_flight_final""")
-    
-    spark.sql("""insert into table lnk_flight_origin_state
-              select hash_key_flight_origin_state as hash_key, FlightDate as load_date, 'reference data, transaction data' as record_source,
-              hash_key_flight, hash_key_origin_state
-              from view_lnk_tran_flight_final""")
-
-    spark.sql("""insert into table lnk_flight_dest
-              select hash_key_flight_dest as hash_key, FlightDate as load_date, 'reference data, transaction data' as record_source,
-              hash_key_flight, hash_key_dest
-              from view_lnk_tran_flight_final""")
-
-    spark.sql("""insert into table lnk_flight_dest_state
-              select hash_key_flight_dest_state as hash_key, FlightDate as load_date, 'reference data, transaction data' as record_source,
-              hash_key_flight, hash_key_dest_state
-              from view_lnk_tran_flight_final""")
 
     increase_time()
 
 if __name__ == "__main__":
     datawarehouse_location = 'hdfs://namenode:9000/datawarehouse'
-    spark = SparkSession.builder.appName("Insert data warehouse").config("spark.sql.warehouse.dir", datawarehouse_location).enableHiveSupport().getOrCreate()
+    spark = SparkSession.builder.appName("Insert transaction data").config("spark.sql.warehouse.dir", datawarehouse_location).enableHiveSupport().getOrCreate()
     spark.sql("use data_warehouse")
     
     year = 2018
