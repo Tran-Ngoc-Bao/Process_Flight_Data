@@ -164,14 +164,29 @@ if __name__ == "__main__":
     spark = SparkSession.builder.appName("Insert data warehouse").config("spark.sql.warehouse.dir", datawarehouse_location).enableHiveSupport().getOrCreate()
     spark.sql("use data_warehouse")
     
-    year = 2018
+    # year = 2018
+    year = 2019
+    # year = 2020
+    # year = 2021
+    # year = 2022
     month = 1
     day = 1
-    flag = True
-    while flag:
-        try:
-            solution()
-        except:
-            print("Don't worry about this error")
-            flag = False
+
+    # while year == 2018:
+    #     solution()
+    while year == 2019:
+        solution()
+    # while year == 2020:
+    #     solution()
+    # while year == 2021:
+    #     solution()
+
+    # flag = True
+    # while flag:
+    #     try:
+    #         solution()
+    #     except:
+    #         print("Don't worry about this error")
+    #         flag = False
+
     # solution()

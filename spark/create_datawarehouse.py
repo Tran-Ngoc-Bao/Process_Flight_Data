@@ -2,7 +2,7 @@ from pyspark.sql import SparkSession
 
 if __name__ == "__main__":
     datawarehouse_location = 'hdfs://namenode:9000/datawarehouse'
-    spark = SparkSession.builder.appName("Create data warehou   se").config("spark.sql.warehouse.dir", datawarehouse_location).enableHiveSupport().getOrCreate()
+    spark = SparkSession.builder.appName("Create data warehouse").config("spark.sql.warehouse.dir", datawarehouse_location).enableHiveSupport().getOrCreate()
     
     # Reference data
     spark.sql("create schema if not exists data_warehouse")
