@@ -62,7 +62,7 @@ def solution():
 
 if __name__ == "__main__":
     datawarehouse_location = 'hdfs://namenode:9000/datawarehouse'
-    spark = SparkSession.builder.appName("Insert reeference data").config("spark.sql.warehouse.dir", datawarehouse_location).enableHiveSupport().getOrCreate()
+    spark = SparkSession.builder.appName("Insert reference data").config("spark.sql.warehouse.dir", datawarehouse_location).enableHiveSupport().getOrCreate()
     spark.sql("use data_warehouse")
     
     year = 2018

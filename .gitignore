@@ -1,3 +1,8 @@
+# Ignore everything
 airflow/source/flight_data/
-airflow/source/spark/
-airflow/source/hadoop/
+airflow/source/spark/*
+airflow/source/hadoop/*
+
+# But not these files
+!airflow/source/spark/conf
+!airflow/source/hadoop/etc
