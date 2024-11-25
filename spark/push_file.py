@@ -4,11 +4,14 @@ def solution():
     global year
     global month
 
-    df = spark.read.csv("/opt/airflow/source/flight_data/raw/Flights_" + str(year) + "_" + str(month) + ".csv")
+    df = spark.read.option("header", "true").csv("/opt/airflow/source/flight_data/raw/Flights_" + str(year) + "_" + str(month) + ".csv")
     df.repartition(1).write.mode("overwrite").parquet("hdfs://namenode:9000/staging/" + str(year) + "/" + str(month))
 
     if month == 12:
         year += 1
+        month = 1
+    else:
+        month += 1
 
 if __name__ == "__main__":
     spark = SparkSession.builder.appName("Push file").getOrCreate()

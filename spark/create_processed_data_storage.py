@@ -2,9 +2,8 @@ from pyspark.sql import SparkSession
 
 if __name__ == "__main__":
     datawarehouse_location = 'hdfs://namenode:9000/datawarehouse'
-    spark = SparkSession.builder.appName("Create data warehouse").config("spark.sql.warehouse.dir", datawarehouse_location).enableHiveSupport().getOrCreate()
+    spark = SparkSession.builder.appName("Create processed data storage").config("spark.sql.warehouse.dir", datawarehouse_location).enableHiveSupport().getOrCreate()
     
-    # Reference data
     spark.sql("create schema if not exists data_warehouse")
     spark.sql("use data_warehouse")
 
@@ -17,11 +16,11 @@ if __name__ == "__main__":
             DestAirportID varchar(255), DestAirportSeqID varchar(255), DestCityMarketID varchar(255), Dest varchar(255), DestCityName varchar(255), DestState varchar(255), DestStateFips varchar(255), DestStateName varchar(255), DestWac varchar(255),
             CRSDepTime int, DepTime int, DepDelay float, DepDelayMinutes float, DepDel15 float, DepartureDelayGroups int, DepTimeBlkStart int, DepTimeBlkEnd int, DepTimeBlk int,
             TaxiOut float, WheelsOff int, WheelsOn int, TaxiIn float,
-            CRSArrTime int, ArrTime int, ArrDelay float, ArrDelayMinutes float, ArrDel15 float, ArrartureDelayGroups int, ArrTimeBlkStart int, ArrTimeBlkEnd int, ArrTimeBlk int,
+            CRSArrTime int, ArrTime int, ArrDelay float, ArrDelayMinutes float, ArrDel15 float, ArrivalDelayGroups int, ArrTimeBlkStart int, ArrTimeBlkEnd int, ArrTimeBlk int,
             Cancelled float,
             CRSElapsedTime float, ActualElapsedTime float, AirTime float,
             Distance float, DistanceGroup int,
             CarrierDelay float, WeatherDelay float, NASDelay float, SecurityDelay float, LateAircraftDelay float,
-            FirstDepTime int, TotalAddGTime float, LongestAddGTime float,
+            FirstDepTime int, TotalAddGTime float, LongestAddGTime float
         )
     """)
