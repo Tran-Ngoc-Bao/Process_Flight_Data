@@ -30,3 +30,10 @@ if __name__ == "__main__":
     # Process date data
     # Cast data type
     # Insert data
+
+    # Ingest data to staging
+    # Code transform data
+    # Processed data storage
+    # Demo Trino
+    # Demo Superset
+    # Demo Spark ML ???

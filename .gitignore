@@ -1,8 +1,16 @@
-# Ignore everything
 airflow/source/flight_data/
 airflow/source/spark/*
 airflow/source/hadoop/*
 
-# But not these files
 !airflow/source/spark/conf
 !airflow/source/hadoop/etc
+
+airflow/source/hadoop/etc/hadoop/*
+airflow/source/spark/conf/*
+
+!airflow/source/hadoop/etc/hadoop/core-site.xml
+!airflow/source/hadoop/etc/hadoop/hdfs-site.xml
+!airflow/source/hadoop/etc/hadoop/mapred-site.xml
+!airflow/source/hadoop/etc/hadoop/yarn-site.xml
+!airflow/source/spark/conf/hive-site.xml
+!airflow/source/spark/conf/spark-default.conf
