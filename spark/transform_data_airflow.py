@@ -64,3 +64,4 @@ if __name__ == "__main__":
                 cast(FirstDepTime as int), cast(TotalAddGTime as float), cast(LongestAddGTime as float)
                 from temp_view
                 """)
+        

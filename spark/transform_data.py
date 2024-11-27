@@ -79,10 +79,3 @@ if __name__ == "__main__":
             print("Don't worry about this error", year, month)
             flag = False
     # solution()
-
-    # Ingest data to staging
-    # Code transform data
-    # Processed data storage
-    # Demo Trino
-    # Demo Superset
-    # Demo Spark ML ???
