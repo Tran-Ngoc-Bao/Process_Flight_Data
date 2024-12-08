@@ -7,6 +7,7 @@
     <ul>
       <li>Process flight data on Kaggle with Data Lake system</li>
       <li>Use Spark SQL and Spark ML to analyze data</li>
+      <li>Use Trino to query data and Superset to visualize data</li>
     </ul>  
   </li>
 </ul>
@@ -36,14 +37,28 @@ docker compose up -d
 docker exec -u root -it airflow-webserver chmod +x /opt/airflow/source/trino; docker exec -u root -it airflow-scheduler chmod +x /opt/airflow/source/trino
 ```
 
-#### 4. Start DAG on Airflow webserver
+#### 4. Set Spark and Hadoop on Airflow cluster
+```
+Download Spark & Hadoop packages and Replace config in airflow/source
+```
+```
+https://www.apache.org/dyn/closer.cgi/hadoop/common/hadoop-3.4.1/hadoop-3.4.1.tar.gz
+```
+```
+https://spark.apache.org/downloads.html
+```
 
-#### 5. Build enviroment Superset
+#### 5. Download Data source to Airflow cluster
+```
+https://www.kaggle.com/datasets/robikscube/flight-delay-dataset-20182022/data?select=readme.md
+```
+
+#### 6. Build enviroment Superset
 ```sh
 ./superset/bootstrap-superset.sh
 ```
   
-#### 6. Visualize data on Superset with SQLalchemy uri
+#### 7. Visualize data on Superset with SQLalchemy uri
 ```
 trino://hive@trino:8080/hive
 ```
