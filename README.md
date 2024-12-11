@@ -6,7 +6,7 @@
   <li>Project objective:
     <ul>
       <li>Process flight data on Kaggle with Data Lake system</li>
-      <li>Use Spark SQL and Spark ML to analyze data</li>
+      <li>Use Spark to process data</li>
       <li>Use Trino to query data and Superset to visualize data</li>
     </ul>  
   </li>
@@ -65,19 +65,19 @@ trino://hive@trino:8080/hive
 
 ## Demo System
 ### Airflow
-  <img src="https://github.com/Tran-Ngoc-Bao/Process_Flight_Data/blob/master/pictures/system/airflow.png">
+  <img style="width:80%;" src="https://github.com/Tran-Ngoc-Bao/Process_Flight_Data/blob/master/pictures/system/airflow.png">
 
 ### HDFS
-  <img src="https://github.com/Tran-Ngoc-Bao/Process_Flight_Data/blob/master/pictures/system/hdfs.png">
+  <img style="width:80%;" src="https://github.com/Tran-Ngoc-Bao/Process_Flight_Data/blob/master/pictures/system/hdfs.png">
 
 ### YARN
-  <img src="https://github.com/Tran-Ngoc-Bao/Process_Flight_Data/blob/master/pictures/system/yarn.png">
+  <img style="width:80%;" src="https://github.com/Tran-Ngoc-Bao/Process_Flight_Data/blob/master/pictures/system/yarn.png">
 
 ### Trino
-  <img src="https://github.com/Tran-Ngoc-Bao/Process_Flight_Data/blob/master/pictures/system/trino.png">
+  <img style="width:80%;" src="https://github.com/Tran-Ngoc-Bao/Process_Flight_Data/blob/master/pictures/system/trino.png">
 
 ### Superset
-  <img src="https://github.com/Tran-Ngoc-Bao/Process_Flight_Data/blob/master/pictures/system/superset.png">
+  <img style="width:80%;" src="https://github.com/Tran-Ngoc-Bao/Process_Flight_Data/blob/master/pictures/system/superset.png">
 
 ## Demo Output
 ### Marketing Airline Network Distribution
@@ -90,6 +90,6 @@ trino://hive@trino:8080/hive
   <img src="https://github.com/Tran-Ngoc-Bao/Process_Flight_Data/blob/master/pictures/charts/ngay-trong-thang-2024-12-01T02-17-37.154Z.jpg">
 
 ### Analysis of Month of Year
-  <img src="https://github.com/Tran-Ngoc-Bao/Process_Flight_Data/blob/master/pictures/charts/số-chuyến-bay-theo-thang-qua-cac-nam-2024-12-01T13-13-34.441Z.jpg">
+  <img style="width:80%;" src="https://github.com/Tran-Ngoc-Bao/Process_Flight_Data/blob/master/pictures/charts/số-chuyến-bay-theo-thang-qua-cac-nam-2024-12-01T13-13-34.441Z.jpg">
 
 ## Report
