@@ -64,5 +64,33 @@ trino://hive@trino:8080/hive
 ```
 
 ## Demo
+### System
+#### 1. Airflow
+  <img src="https://github.com/Tran-Ngoc-Bao/Process_Flight_Data/blob/master/pictures/system/airflow.png">
+
+#### 2. HDFS
+  <img src="https://github.com/Tran-Ngoc-Bao/Process_Flight_Data/blob/master/pictures/system/hdfs.png">
+
+#### 3. YARN
+  <img src="https://github.com/Tran-Ngoc-Bao/Process_Flight_Data/blob/master/pictures/system/yarn.png">
+
+#### 4. Trino
+  <img src="https://github.com/Tran-Ngoc-Bao/Process_Flight_Data/blob/master/pictures/system/trino.png">
+
+#### 5. Superset
+  <img src="https://github.com/Tran-Ngoc-Bao/Process_Flight_Data/blob/master/pictures/system/superset.png">
+
+### Output
+#### Marketing Airline Network Distribution
+  <img src="https://github.com/Tran-Ngoc-Bao/Process_Flight_Data/blob/master/pictures/charts/phan-phối-mạng-lưới-tiếp-thị-hang-khong-2024-11-30T14-42-52.691Z.jpg">
+
+#### Analysis of Mean Delay by Aircraft Carrier
+  <img src="https://github.com/Tran-Ngoc-Bao/Process_Flight_Data/blob/master/pictures/charts/dộ-trễ-trung-binh-theo-hang-hang-khong-2024-11-30T15-13-50.328Z.jpg">
+
+#### Analysis of Day of Month
+  <img src="https://github.com/Tran-Ngoc-Bao/Process_Flight_Data/blob/master/pictures/charts/ngay-trong-thang-2024-12-01T02-17-37.154Z.jpg">
+
+#### Analysis of Month of Year
+  <img src="https://github.com/Tran-Ngoc-Bao/Process_Flight_Data/blob/master/pictures/charts/số-chuyến-bay-theo-thang-qua-cac-nam-2024-12-01T13-13-34.441Z.jpg">
 
 ## Report
