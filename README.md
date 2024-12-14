@@ -6,7 +6,7 @@
   <li>Project objective:
     <ul>
       <li>Process flight data on Kaggle with Data Lake system</li>
-      <li>Use Spark to process data</li>
+      <li>Use Spark Streaming and Spark SQL to process data</li>
       <li>Use Trino to query data and Superset to visualize data</li>
     </ul>  
   </li>
@@ -18,13 +18,16 @@
 ## Deploy system
 #### 1. Should pull and build images before
 ```sh
-docker pull postgres bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8 bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8 bde2020/hadoop-resourcemanager:2.0.0-hadoop3.2.1-java8 bde2020/hadoop-nodemanager:2.0.0-hadoop3.2.1-java8 bde2020/hadoop-historyserver:2.0.0-hadoop3.2.1-java8
+docker pull confluentinc/cp-zookeeper confluentinc/cp-kafka provectuslabs/kafka-ui postgres bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8 bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8 bde2020/hadoop-resourcemanager:2.0.0-hadoop3.2.1-java8 bde2020/hadoop-nodemanager:2.0.0-hadoop3.2.1-java8 bde2020/hadoop-historyserver:2.0.0-hadoop3.2.1-java8
 ```
 ```sh
 docker build ./airflow -t airflow
 ```
 ```sh
 docker build ./superset -t superset
+```
+```sh
+docker build ./flask -t data-source
 ```
 
 #### 2. Start system
@@ -42,13 +45,13 @@ docker exec -u root -it airflow-webserver chmod +x /opt/airflow/source/trino; do
 Download Spark & Hadoop packages and Replace config in airflow/source
 ```
 ```
-https://www.apache.org/dyn/closer.cgi/hadoop/common/hadoop-3.4.1/hadoop-3.4.1.tar.gz
-```
-```
 https://spark.apache.org/downloads.html
 ```
+```
+https://www.apache.org/dyn/closer.cgi/hadoop/common/hadoop-3.4.1/hadoop-3.4.1.tar.gz
+```
 
-#### 5. Download Data source to Airflow cluster
+#### 5. Download data source and Save raw as folder data_source to server backend
 ```
 https://www.kaggle.com/datasets/robikscube/flight-delay-dataset-20182022/data?select=readme.md
 ```

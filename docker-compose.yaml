@@ -27,9 +27,105 @@ x-airflow-common:
     - ./airflow/source:/opt/airflow/source
     - ./spark:/opt/airflow/spark
     - ./sql:/opt/airflow/sql
-
+    - ./kafka:/opt/airflow/kafka
 
 services:
+  # Server backend data source
+  data-source:
+    image: data-source
+    container_name: data-source
+    ports:
+      - 5000:5000
+    restart: always
+    networks:
+      flight_net:
+    volumes:
+      - ./data_source:/data
+
+  # Kafka
+  zookeeper:
+    image: confluentinc/cp-zookeeper
+    container_name: zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+      ZOOKEEPER_INIT_LIMIT: 5
+      ZOOKEEPER_SYNC_LIMIT: 2
+    healthcheck:
+      test: nc -z zookeeper 2181 || exit -1
+      start_period: 15s
+      interval: 5s
+      timeout: 10s
+      retries: 10
+    ports:
+      - 2181:2181
+    networks:
+      flight_net:
+    volumes:
+      - zookeeper_secrets:/etc/zookeeper/secrets
+      - zookeeper_data:/var/lib/zookeeper/data
+      - zookeeper_log:/var/lib/zookeeper/log
+  
+  broker01:
+    image: confluentinc/cp-kafka
+    container_name: broker01
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENERS: PLAINTEXT_HOST://broker01:9092,PLAINTEXT://broker01:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT_HOST://localhost:9092,PLAINTEXT://broker01:9093
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_JMX_PORT: 9090
+      KAFKA_LOG_DIRS: /var/log/kafka
+      KAFKA_NUM_PARTITIONS: 2
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 100
+      CONFLUENT_METRICS_ENABLE: 'false'
+    healthcheck:
+      test: nc -z broker01 9092 || exit -1
+      start_period: 15s
+      interval: 5s
+      timeout: 10s
+      retries: 10
+    mem_limit: 1G
+    ports:
+      - 9092:9092
+    networks:
+      flight_net:
+    volumes:
+      - ./kafka/run_workaround.sh:/tmp/run_workaround.sh
+      - kafka_secrets:/etc/kafka/secrets
+      - kafka_data:/var/lib/kafka/data
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui
+    container_name: kafka-ui
+    depends_on:
+      broker01:
+        condition: service_healthy
+    environment:
+      KAFKA_CLUSTERS_0_NAME: flight-data
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: broker01:9093
+      KAFKA_CLUSTERS_0_METRICS_PORT: 9090
+    healthcheck:
+      test: nc -z kafka-ui 8080 || exit -1
+      start_period: 15s
+      interval: 5s
+      timeout: 10s
+      retries: 10
+    mem_limit: 1G
+    ports:
+      - 8282:8080
+    networks:
+      flight_net:
+
   # Airflow
   postgres:
     image: postgres
@@ -198,6 +294,11 @@ networks:
   flight_net:
   
 volumes:
+  zookeeper_secrets:
+  zookeeper_data:
+  zookeeper_log:
+  kafka_secrets:
+  kafka_data:
   postgres_db_volume:
   airflow_logs:
   airflow_plugins:

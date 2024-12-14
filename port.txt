@@ -1,3 +1,4 @@
+kafka-ui: 8282
 airflow-webserver: 8080
 namenode: 9870
 yarn: 8888
