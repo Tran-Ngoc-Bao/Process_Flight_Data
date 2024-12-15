@@ -46,7 +46,7 @@ def increase_time_def():
         columns = ["year", "month"]
         data = [(year, month)]
         df = spark.createDataFrame(data, columns)
-        # df.repartition(1).write.option("header", "true").mode("overwrite").csv("hdfs://namenode:9000/time")
+        # df.write.option("header", "true").mode("overwrite").csv("hdfs://namenode:9000/time")
 
 def extract_data_def():
     global year
@@ -61,7 +61,7 @@ def extract_data_def():
         else:
             print("Produced event to topic {topic}: key = {key:12}".format(topic=msg.topic(), key=msg.key().decode('utf-8')))
 
-    topic = 'flight_data'
+    topic = f'flight_data_{year}'
     url = 'http://data-source:5000/api/get_data'
     params = {'year': year, 'month': month, 'offset': 0, 'limit': 100}
 
@@ -74,7 +74,8 @@ def extract_data_def():
                 break
 
             if data['status'] == 'success' or data['status'] == 'complete':
-                key = str(params['offset'])
+                key = str(year) + '_' + str(month) + '_' + str(params['offset'])
+                print(key)
                 value = json.dumps(data['data'])
                 producer.produce(topic, value, key, callback=delivery_callback)
                 
@@ -94,11 +95,17 @@ extract_data = PythonOperator(
     dag=dag
 )
 
-# transform_data = BashOperator(
-#     task_id="transform_data",
-#     bash_command=f"source /opt/airflow/source/env.sh && spark-submit /opt/airflow/spark/transform_data_airflow.py {year} {month}",
-#     dag=dag
-# )
+load_data = BashOperator(
+    task_id="load_data",
+    bash_command=f"source /opt/airflow/source/env.sh && spark-submit /opt/airflow/spark/load_data.py {year} {month}",
+    dag=dag
+)
+
+transform_data = BashOperator(
+    task_id="transform_data",
+    bash_command=f"source /opt/airflow/source/env.sh && spark-submit /opt/airflow/spark/transform_data_airflow.py {year} {month}",
+    dag=dag
+)
 
 increase_time = PythonOperator(
     task_id="increase_time",
@@ -106,4 +113,5 @@ increase_time = PythonOperator(
     dag=dag
 )
 
-extract_data >> increase_time
+extract_data
+load_data >> transform_data >> increase_time
