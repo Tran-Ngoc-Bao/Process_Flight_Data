@@ -1,14 +1,13 @@
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import *
+from sys import argv
 
 if __name__ == "__main__":
     datawarehouse_location = 'hdfs://namenode:9000/processed_data'
     spark = SparkSession.builder.appName("Transform data").config("spark.sql.warehouse.dir", datawarehouse_location).enableHiveSupport().getOrCreate()
 
-    time_df = spark.read.option("header", "true").csv("hdfs://namenode:9000/time")
-    time = time_df.first()
-    year = int(time["year"])
-    month = int(time["month"])
+    year = int(argv[1])
+    month = int(argv[2])
 
     if (year == 2022 and month >= 8) or year > 2022:
         pass
@@ -87,14 +86,3 @@ if __name__ == "__main__":
             from temp_view
         """
         spark.sql(insert_into_sql)
-        
-        if month == 12:
-            year += 1
-            month = 1
-        else:
-            month += 1
-        
-        columns = ["year", "month"]
-        data = [(year, month)]
-        time_df = spark.createDataFrame(data, columns)
-        time_df.write.option("header", "true").mode("overwrite").csv("hdfs://namenode:9000/time")

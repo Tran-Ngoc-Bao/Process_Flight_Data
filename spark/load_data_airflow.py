@@ -2,18 +2,17 @@ from pyspark.sql import SparkSession
 from pyspark.sql.functions import from_json
 from pyspark.sql.types import StructType, StructField, StringType
 import threading
+from sys import argv
 
 if __name__ == "__main__":
+    year = int(argv[1])
+    month = int(argv[2])
+    
     spark = SparkSession.builder \
         .appName("Load data") \
         .config("spark.streaming.stopGracefullyOnShutdown", True) \
         .config('spark.jars.packages', 'org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.1') \
         .getOrCreate()
-
-    time_df = spark.read.option("header", "true").csv("hdfs://namenode:9000/time")
-    time = time_df.first()
-    year = int(time["year"])
-    month = int(time["month"])
 
     if (year == 2022 and month >= 8) or year > 2022:
         pass
@@ -157,8 +156,11 @@ if __name__ == "__main__":
             .option("checkpointLocation", "hdfs://namenode:9000/tmp/" + str(year) + "/" + str(month)) \
             .outputMode("append") \
             .start()
+        
+        def stop_query():
+            writing_df.stop()
 
-        timer = threading.Timer(10 * 60, writing_df.stop())
+        timer = threading.Timer(10 * 60, stop_query)
         timer.start()
 
         writing_df.awaitTermination()

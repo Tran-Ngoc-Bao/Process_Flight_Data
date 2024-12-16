@@ -4,10 +4,8 @@ from sys import argv
 if __name__ == "__main__":
     spark = SparkSession.builder.appName("Push file").getOrCreate()
 
-    time_df = spark.read.option("header", "true").csv("hdfs://namenode:9000/time")
-    time = time_df.first()
-    year = int(time["year"])
-    month = int(time["month"])
+    year = int(argv[1])
+    month = int(argv[2])
 
     if (year == 2022 and month >= 8) or year > 2022:
         pass
