@@ -42,7 +42,7 @@ def increase_time_def():
         columns = ["year", "month"]
         data = [(year, month)]
         df = spark.createDataFrame(data, columns)
-        # df.repartition(1).write.option("header", "true").mode("overwrite").csv("hdfs://namenode:9000/time")
+        df.repartition(1).write.option("header", "true").mode("overwrite").csv("hdfs://namenode:9000/time")
 
 transform_data = BashOperator(
     task_id="transform_data",

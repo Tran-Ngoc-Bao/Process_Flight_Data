@@ -19,7 +19,7 @@ default_args = {
     "retry_delay": timedelta(minutes=1),
 }
 
-dag = DAG("elt_streaming", default_args=default_args, schedule_interval="*/15 * * * *", max_active_runs=1)
+dag = DAG("data_flow", default_args=default_args, schedule_interval="*/15 * * * *", max_active_runs=1)
 
 year = 2030
 month = 1
@@ -46,7 +46,7 @@ def increase_time_def():
         columns = ["year", "month"]
         data = [(year, month)]
         df = spark.createDataFrame(data, columns)
-        # df.write.option("header", "true").mode("overwrite").csv("hdfs://namenode:9000/time")
+        df.write.option("header", "true").mode("overwrite").csv("hdfs://namenode:9000/time")
 
 def delivery_callback(err, msg):
     if err:
