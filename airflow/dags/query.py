@@ -16,7 +16,7 @@ default_args = {
     "retry_delay": timedelta(minutes=1),
 }
 
-dag = DAG("transform", default_args=default_args, schedule_interval="*/2 * * * *", max_active_runs=1)
+dag = DAG("query", default_args=default_args, schedule_interval="*/2 * * * *", max_active_runs=1)
 
 year = 2030
 month = 1

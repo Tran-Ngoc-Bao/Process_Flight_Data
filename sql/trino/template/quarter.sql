@@ -1,3 +1,5 @@
+create schema if not exists hive.datasets_quarter;
+
 create table if not exists hive.datasets_quarter.marketing_airline_network_{year}_{quarter}
 with (format = 'parquet')
 as select

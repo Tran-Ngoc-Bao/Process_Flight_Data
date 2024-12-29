@@ -19,12 +19,12 @@ if __name__ == "__main__":
     year = 2018
     month = 1
 
-    flag = True
-    while flag:
-        try:
-            solution()
-        except:
-            print("Don't worry about this error", year, month)
-            flag = False
-    # solution()
+    # flag = True
+    # while flag:
+    #     try:
+    #         solution()
+    #     except:
+    #         print("Don't worry about this error", year, month)
+    #         flag = False
+    solution()
     

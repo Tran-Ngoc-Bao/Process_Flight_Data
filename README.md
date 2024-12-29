@@ -74,4 +74,7 @@ trino://hive@trino:8080/hive
   <img style="width:80%;" src="https://github.com/Tran-Ngoc-Bao/Process_Flight_Data/blob/master/pictures/charts/số-chuyến-bay-theo-thang-qua-cac-nam-2024-12-01T13-13-34.441Z.jpg">
 
 ## Report
-
+<ul>
+  <li><a href="https://github.com/Tran-Ngoc-Bao/Process_Flight_Data/blob/master/pictures/report/report.pdf">Report</a></li>
+  <li><a href="https://github.com/Tran-Ngoc-Bao/Process_Flight_Data/blob/master/pictures/report/slide.pptx">Slide</a></li>
+</ul>

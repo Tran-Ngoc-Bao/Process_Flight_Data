@@ -1,4 +1,5 @@
 data_source/
+airflow/source/flight_data/raw/*
 airflow/source/spark/*
 airflow/source/hadoop/*
 airflow/dags/__pycache__
