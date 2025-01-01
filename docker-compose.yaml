@@ -191,9 +191,9 @@ services:
     volumes:
       - hadoop_namenode:/hadoop/dfs/name
 
-  datanode:
+  datanode01:
     image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
-    container_name: datanode
+    container_name: datanode01
     environment:
       SERVICE_PRECONDITION: "namenode:9870"
     env_file:
@@ -202,13 +202,39 @@ services:
     networks:
       flight_net:
     volumes:
-      - hadoop_datanode:/hadoop/dfs/data
+      - hadoop_datanode01:/hadoop/dfs/data
+
+  datanode02:
+    image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
+    container_name: datanode02
+    environment:
+      SERVICE_PRECONDITION: "namenode:9870"
+    env_file:
+      - ./hadoop/hadoop.env
+    restart: always
+    networks:
+      flight_net:
+    volumes:
+      - hadoop_datanode02:/hadoop/dfs/data
+
+  datanode03:
+    image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
+    container_name: datanode03
+    environment:
+      SERVICE_PRECONDITION: "namenode:9870"
+    env_file:
+      - ./hadoop/hadoop.env
+    restart: always
+    networks:
+      flight_net:
+    volumes:
+      - hadoop_datanode03:/hadoop/dfs/data
   
   resourcemanager:
     image: bde2020/hadoop-resourcemanager:2.0.0-hadoop3.2.1-java8
     container_name: resourcemanager
     environment:
-      SERVICE_PRECONDITION: "namenode:9000 namenode:9870 datanode:9864"
+      SERVICE_PRECONDITION: "namenode:9000 namenode:9870"
     env_file:
       - ./hadoop/hadoop.env
     ports:
@@ -221,7 +247,7 @@ services:
     image: bde2020/hadoop-nodemanager:2.0.0-hadoop3.2.1-java8
     container_name: nodemanager
     environment:
-      SERVICE_PRECONDITION: "namenode:9000 namenode:9870 datanode:9864 resourcemanager:8088"
+      SERVICE_PRECONDITION: "namenode:9000 namenode:9870 resourcemanager:8088"
     env_file:
       - ./hadoop/hadoop.env
     restart: always
@@ -232,7 +258,7 @@ services:
     image: bde2020/hadoop-historyserver:2.0.0-hadoop3.2.1-java8
     container_name: historyserver
     environment:
-      SERVICE_PRECONDITION: "namenode:9000 namenode:9870 datanode:9864 resourcemanager:8088"
+      SERVICE_PRECONDITION: "namenode:9000 namenode:9870 resourcemanager:8088"
     env_file:
       - ./hadoop/hadoop.env
     ports:
@@ -304,7 +330,9 @@ volumes:
   airflow_plugins:
   airflow_scripts:
   hadoop_namenode:
-  hadoop_datanode:
+  hadoop_datanode01:
+  hadoop_datanode02:
+  hadoop_datanode03:
   hadoop_historyserver:
   hive_metastore_postgresql:
   superset_data:
