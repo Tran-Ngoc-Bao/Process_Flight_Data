@@ -94,37 +94,37 @@ def query_data_def():
     global month
 
     string = ''
-    with open('/opt/airflow/sql/trino/template/month.sql', 'r') as f:
+    with open('/opt/airflow/sql/template/month.sql', 'r') as f:
         string = f.read()
 
     string_replace = string.replace('{year}', str(year)).replace('{month}', str(month))
-    with open(f'/opt/airflow/sql/trino/month/month_{year}_{month}.sql', 'w') as f:
+    with open(f'/opt/airflow/sql/month/month_{year}_{month}.sql', 'w') as f:
         f.write(string_replace)
 
-    os.system(f'cd /opt/airflow/source && ./trino --server http://trino:8080 --file /opt/airflow/sql/trino/month/month_{year}_{month}.sql')
+    os.system(f'cd /opt/airflow/source && ./trino --server http://trino:8080 --file /opt/airflow/sql/month/month_{year}_{month}.sql')
 
     if month % 3 == 0:
         string = ''
-        with open('/opt/airflow/sql/trino/template/quarter.sql', 'r') as f:
+        with open('/opt/airflow/sql/template/quarter.sql', 'r') as f:
             string = f.read()
 
         quarter = int(month / 3)
         string_replace = string.replace('{year}', str(year)).replace('{quarter}', str(quarter))
-        with open(f'/opt/airflow/sql/trino/quarter/quarter_{year}_{quarter}.sql', 'w') as f:
+        with open(f'/opt/airflow/sql/quarter/quarter_{year}_{quarter}.sql', 'w') as f:
             f.write(string_replace)
         
-        os.system(f'cd /opt/airflow/source && ./trino --server http://trino:8080 --file /opt/airflow/sql/trino/quarter/quarter_{year}_{quarter}.sql')
+        os.system(f'cd /opt/airflow/source && ./trino --server http://trino:8080 --file /opt/airflow/sql/quarter/quarter_{year}_{quarter}.sql')
 
         if month % 12 == 0:
             string = ''
-            with open('/opt/airflow/sql/trino/template/year.sql', 'r') as f:
+            with open('/opt/airflow/sql/template/year.sql', 'r') as f:
                 string = f.read()
 
             string_replace = string.replace('{year}', str(year))
-            with open(f'/opt/airflow/sql/trino/year/year_{year}.sql', 'w') as f:
+            with open(f'/opt/airflow/sql/year/year_{year}.sql', 'w') as f:
                 f.write(string_replace)
             
-            os.system(f'cd /opt/airflow/source && ./trino --server http://trino:8080 --file /opt/airflow/sql/trino/year/year_{year}.sql')
+            os.system(f'cd /opt/airflow/source && ./trino --server http://trino:8080 --file /opt/airflow/sql/year/year_{year}.sql')
 
 extract_data = PythonOperator(
     task_id="extract_data",

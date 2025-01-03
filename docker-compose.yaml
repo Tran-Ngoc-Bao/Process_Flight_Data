@@ -26,7 +26,7 @@ x-airflow-common:
     - ./airflow/dags:/opt/airflow/dags
     - ./airflow/source:/opt/airflow/source
     - ./spark:/opt/airflow/spark
-    - ./sql:/opt/airflow/sql
+    - ./trino/sql:/opt/airflow/sql
     - ./kafka:/opt/airflow/kafka
 
 services:
