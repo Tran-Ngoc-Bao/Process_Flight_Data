@@ -5,18 +5,25 @@ x-airflow-common:
   image: airflow
   # build: ./airflow
   depends_on:
+    &airflow-common-depends-on
+    redis:
+      condition: service_healthy
     postgres:
       condition: service_healthy
   environment:
     &airflow-common-env
-    AIRFLOW__CORE__EXECUTOR: LocalExecutor
+    AIRFLOW__CORE__EXECUTOR: CeleryExecutor
+    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
     AIRFLOW__CORE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
+    AIRFLOW__CELERY__RESULT_BACKEND: db+postgresql://airflow:airflow@postgres/airflow
+    AIRFLOW__CELERY__BROKER_URL: redis://:@redis:6379/0
     AIRFLOW__CORE__FERNET_KEY: ''
     AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'true'
-    AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
-    AIRFLOW__API__AUTH_BACKEND: 'airflow.api.auth.backend.basic_auth'
-    _PIP_ADDITIONAL_REQUIREMENTS: ${_PIP_ADDITIONAL_REQUIREMENTS:- apache-airflow-providers-microsoft-mssql}
-  user: "${AIRFLOW_UID:-50000}:${AIRFLOW_GID:-50000}"
+    AIRFLOW__CORE__LOAD_EXAMPLES: 'true'
+    AIRFLOW__API__AUTH_BACKENDS: 'airflow.api.auth.backend.basic_auth,airflow.api.auth.backend.session'
+    AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK: 'true'
+    _PIP_ADDITIONAL_REQUIREMENTS: ${_PIP_ADDITIONAL_REQUIREMENTS:-}
+  user: "${AIRFLOW_UID:-50000}:0"
   networks:
     flight_net:
   volumes:
@@ -33,7 +40,7 @@ services:
   # Server backend data source
   data-source:
     image: data-source
-    container_name: data-source
+    container_name: service
     ports:
       - 5000:5000
     restart: always
@@ -75,34 +82,86 @@ services:
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_LISTENERS: PLAINTEXT_HOST://broker01:9092,PLAINTEXT://broker01:9093
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT_HOST://localhost:9092,PLAINTEXT://broker01:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT_HOST://localhost:28092,PLAINTEXT://broker01:9092
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_JMX_PORT: 9090
       KAFKA_LOG_DIRS: /var/log/kafka
-      KAFKA_NUM_PARTITIONS: 2
+      KAFKA_NUM_PARTITIONS: 3
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
-      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 100
       CONFLUENT_METRICS_ENABLE: 'false'
-    healthcheck:
-      test: nc -z broker01 9092 || exit -1
-      start_period: 15s
-      interval: 5s
-      timeout: 10s
-      retries: 10
-    mem_limit: 1G
     ports:
-      - 9092:9092
+      - 28092:28092
     networks:
       flight_net:
     volumes:
       - ./kafka/run_workaround.sh:/tmp/run_workaround.sh
-      - kafka_secrets:/etc/kafka/secrets
-      - kafka_data:/var/lib/kafka/data
+      - kafka_secrets_1:/etc/kafka/secrets
+      - kafka_data_1:/var/lib/kafka/data
+
+  broker02:
+    image: confluentinc/cp-kafka
+    container_name: broker02
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+    environment:
+      KAFKA_BROKER_ID: 2
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT_HOST://localhost:29092,PLAINTEXT://broker02:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_JMX_PORT: 9090
+      KAFKA_LOG_DIRS: /var/log/kafka
+      KAFKA_NUM_PARTITIONS: 3
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 100
+      CONFLUENT_METRICS_ENABLE: 'false'
+    ports:
+      - 29092:29092
+    networks:
+      flight_net:
+    volumes:
+      - ./kafka/run_workaround.sh:/tmp/run_workaround.sh
+      - kafka_secrets_2:/etc/kafka/secrets
+      - kafka_data_2:/var/lib/kafka/data
+
+  broker03:
+    image: confluentinc/cp-kafka
+    container_name: broker03
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+    environment:
+      KAFKA_BROKER_ID: 3
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT_HOST://localhost:30092,PLAINTEXT://broker03:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_JMX_PORT: 9090
+      KAFKA_LOG_DIRS: /var/log/kafka
+      KAFKA_NUM_PARTITIONS: 3
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 100
+      CONFLUENT_METRICS_ENABLE: 'false'
+    ports:
+      - 30092:30092
+    networks:
+      flight_net:
+    volumes:
+      - ./kafka/run_workaround.sh:/tmp/run_workaround.sh
+      - kafka_secrets_3:/etc/kafka/secrets
+      - kafka_data_3:/var/lib/kafka/data
 
   kafka-ui:
     image: provectuslabs/kafka-ui
@@ -111,68 +170,175 @@ services:
       broker01:
         condition: service_healthy
     environment:
-      KAFKA_CLUSTERS_0_NAME: flight-data
-      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: broker01:9093
+      KAFKA_CLUSTERS_0_NAME: kafka
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: broker02:9092
       KAFKA_CLUSTERS_0_METRICS_PORT: 9090
-    healthcheck:
-      test: nc -z kafka-ui 8080 || exit -1
-      start_period: 15s
-      interval: 5s
-      timeout: 10s
-      retries: 10
-    mem_limit: 1G
     ports:
       - 8282:8080
     networks:
       flight_net:
 
-  # Airflow
-  postgres:
-    image: postgres
-    container_name: postgres
-    environment:
-      POSTGRES_USER: airflow
-      POSTGRES_PASSWORD: airflow
-      POSTGRES_DB: airflow
-    healthcheck:
-      test: ["CMD", "pg_isready", "-U", "airflow"]
-      interval: 5s
-      retries: 5
-    restart: always
-    networks:
-      flight_net:
-    volumes:
-      - postgres_db_volume:/var/lib/postgresql/data
+  # # Airflow
+  # postgres:
+  #   image: postgres
+  #   container_name: postgres
+  #   environment:
+  #     POSTGRES_USER: airflow
+  #     POSTGRES_PASSWORD: airflow
+  #     POSTGRES_DB: airflow
+  #   healthcheck:
+  #     test: ["CMD", "pg_isready", "-U", "airflow"]
+  #     interval: 10s
+  #     retries: 5
+  #     start_period: 5s
+  #   restart: always
+  #   volumes:
+  #     - postgres_db_volume:/var/lib/postgresql/data
 
-  airflow-webserver:
-    <<: *airflow-common
-    container_name: airflow-webserver
-    healthcheck:
-      test: ["CMD", "curl", "--fail", "http://localhost:8080/health"]
-      interval: 10s
-      timeout: 10s
-      retries: 5
-    ports:
-      - 8080:8080
-    restart: always
-    command: webserver
+  # redis:
+  #   image: redis
+  #   container_name: redis
+  #   expose:
+  #     - 6379
+  #   healthcheck:
+  #     test: ["CMD", "redis-cli", "ping"]
+  #     interval: 10s
+  #     timeout: 30s
+  #     retries: 50
+  #     start_period: 30s
+  #   restart: always
 
-  airflow-scheduler:
-    <<: *airflow-common
-    container_name: airflow-scheduler
-    restart: always
-    command: scheduler
+  # airflow-webserver:
+  #   <<: *airflow-common
+  #   container_name: airflow-webserver
+  #   depends_on:
+  #     <<: *airflow-common-depends-on
+  #     airflow-init:
+  #       condition: service_completed_successfully
+  #   healthcheck:
+  #     test: ["CMD", "curl", "--fail", "http://localhost:8080/health"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 5
+  #     start_period: 30s
+  #   ports:
+  #     - 8080:8080
+  #   restart: always
+  #   command: webserver
 
-  airflow-init:
-    <<: *airflow-common
-    container_name: airflow-init
-    environment:
-      <<: *airflow-common-env
-      _AIRFLOW_DB_UPGRADE: 'true'
-      _AIRFLOW_WWW_USER_CREATE: 'true'
-      _AIRFLOW_WWW_USER_USERNAME: ${_AIRFLOW_WWW_USER_USERNAME:-airflow}
-      _AIRFLOW_WWW_USER_PASSWORD: ${_AIRFLOW_WWW_USER_PASSWORD:-airflow}
-    command: version
+  # airflow-scheduler:
+  #   <<: *airflow-common
+  #   container_name: airflow-scheduler
+  #   depends_on:
+  #     <<: *airflow-common-depends-on
+  #     airflow-init:
+  #       condition: service_completed_successfully
+  #   healthcheck:
+  #     test: ["CMD", "curl", "--fail", "http://localhost:8974/health"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 5
+  #     start_period: 30s
+  #   restart: always
+  #   command: scheduler
+
+  # airflow-worker:
+  #   <<: *airflow-common
+  #   container_name: airflow-worker
+  #   depends_on:
+  #     <<: *airflow-common-depends-on
+  #     airflow-init:
+  #       condition: service_completed_successfully
+  #   environment:
+  #     <<: *airflow-common-env
+  #     DUMB_INIT_SETSID: "0"
+  #   healthcheck:
+  #     test:
+  #       - "CMD-SHELL"
+  #       - 'celery --app airflow.executors.celery_executor.app inspect ping -d "celery@$${HOSTNAME}"'
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 5
+  #     start_period: 30s
+  #   restart: always
+  #   command: celery worker
+
+  # airflow-init:
+  #   <<: *airflow-common
+  #   container_name: airflow-init
+  #   entrypoint: /bin/bash
+  #   environment:
+  #     <<: *airflow-common-env
+  #     _AIRFLOW_DB_UPGRADE: 'true'
+  #     _AIRFLOW_WWW_USER_CREATE: 'true'
+  #     _AIRFLOW_WWW_USER_USERNAME: ${_AIRFLOW_WWW_USER_USERNAME:-airflow}
+  #     _AIRFLOW_WWW_USER_PASSWORD: ${_AIRFLOW_WWW_USER_PASSWORD:-airflow}
+  #     _PIP_ADDITIONAL_REQUIREMENTS: ''
+  #   user: "0:0"
+  #   command:
+  #     - -c
+  #     - |
+  #       function ver() {
+  #         printf "%04d%04d%04d%04d" $${1//./ }
+  #       }
+  #       airflow_version=$$(AIRFLOW__LOGGING__LOGGING_LEVEL=INFO && gosu airflow airflow version)
+  #       airflow_version_comparable=$$(ver $${airflow_version})
+  #       min_airflow_version=2.2.0
+  #       min_airflow_version_comparable=$$(ver $${min_airflow_version})
+  #       if (( airflow_version_comparable < min_airflow_version_comparable )); then
+  #         echo
+  #         echo -e "\033[1;31mERROR!!!: Too old Airflow version $${airflow_version}!\e[0m"
+  #         echo "The minimum Airflow version supported: $${min_airflow_version}. Only use this or higher!"
+  #         echo
+  #         exit 1
+  #       fi
+  #       if [[ -z "${AIRFLOW_UID}" ]]; then
+  #         echo
+  #         echo -e "\033[1;33mWARNING!!!: AIRFLOW_UID not set!\e[0m"
+  #         echo "If you are on Linux, you SHOULD follow the instructions below to set "
+  #         echo "AIRFLOW_UID environment variable, otherwise files will be owned by root."
+  #         echo "For other operating systems you can get rid of the warning with manually created .env file:"
+  #         echo "    See: https://airflow.apache.org/docs/apache-airflow/stable/howto/docker-compose/index.html#setting-the-right-airflow-user"
+  #         echo
+  #       fi
+  #       one_meg=1048576
+  #       mem_available=$$(($$(getconf _PHYS_PAGES) * $$(getconf PAGE_SIZE) / one_meg))
+  #       cpus_available=$$(grep -cE 'cpu[0-9]+' /proc/stat)
+  #       disk_available=$$(df / | tail -1 | awk '{print $$4}')
+  #       warning_resources="false"
+  #       if (( mem_available < 4000 )) ; then
+  #         echo
+  #         echo -e "\033[1;33mWARNING!!!: Not enough memory available for Docker.\e[0m"
+  #         echo "At least 4GB of memory required. You have $$(numfmt --to iec $$((mem_available * one_meg)))"
+  #         echo
+  #         warning_resources="true"
+  #       fi
+  #       if (( cpus_available < 2 )); then
+  #         echo
+  #         echo -e "\033[1;33mWARNING!!!: Not enough CPUS available for Docker.\e[0m"
+  #         echo "At least 2 CPUs recommended. You have $${cpus_available}"
+  #         echo
+  #         warning_resources="true"
+  #       fi
+  #       if (( disk_available < one_meg * 10 )); then
+  #         echo
+  #         echo -e "\033[1;33mWARNING!!!: Not enough Disk space available for Docker.\e[0m"
+  #         echo "At least 10 GBs recommended. You have $$(numfmt --to iec $$((disk_available * 1024 )))"
+  #         echo
+  #         warning_resources="true"
+  #       fi
+  #       if [[ $${warning_resources} == "true" ]]; then
+  #         echo
+  #         echo -e "\033[1;33mWARNING!!!: You have not enough resources to run Airflow (see above)!\e[0m"
+  #         echo "Please follow the instructions to increase amount of resources available:"
+  #         echo "   https://airflow.apache.org/docs/apache-airflow/stable/howto/docker-compose/index.html#before-you-begin"
+  #         echo
+  #       fi
+  #       mkdir -p /sources/logs /sources/dags /sources/plugins
+  #       chown -R "${AIRFLOW_UID}:0" /sources/{logs,dags,plugins}
+  #       exec /entrypoint airflow version
+  #   volumes:
+  #     - ./airflow:/sources
 
   # HDFS
   namenode:
@@ -230,6 +396,7 @@ services:
     volumes:
       - hadoop_datanode03:/hadoop/dfs/data
   
+  # YARN
   resourcemanager:
     image: bde2020/hadoop-resourcemanager:2.0.0-hadoop3.2.1-java8
     container_name: resourcemanager
@@ -243,9 +410,9 @@ services:
     networks:
       flight_net:
 
-  nodemanager:
+  nodemanager01:
     image: bde2020/hadoop-nodemanager:2.0.0-hadoop3.2.1-java8
-    container_name: nodemanager
+    container_name: nodemanager01
     environment:
       SERVICE_PRECONDITION: "namenode:9000 namenode:9870 resourcemanager:8088"
     env_file:
@@ -254,33 +421,45 @@ services:
     networks:
       flight_net:
   
-  historyserver:
-    image: bde2020/hadoop-historyserver:2.0.0-hadoop3.2.1-java8
-    container_name: historyserver
+  nodemanager02:
+    image: bde2020/hadoop-nodemanager:2.0.0-hadoop3.2.1-java8
+    container_name: nodemanager02
     environment:
       SERVICE_PRECONDITION: "namenode:9000 namenode:9870 resourcemanager:8088"
     env_file:
       - ./hadoop/hadoop.env
-    ports:
-      - 8188:8188
     restart: always
     networks:
       flight_net:
-    volumes:
-      - hadoop_historyserver:/hadoop/yarn/timeline
 
-  # Data Warehouse
-  trino:
+  # Trino
+  coordinator:
     image: trinodb/trino:457
-    container_name: trino
+    container_name: coordinator
     ports:
       - 8383:8080
     networks:
       flight_net:
     volumes:
-      - ./trino/etc:/usr/lib/trino/etc:ro
-      - ./trino/catalog:/etc/trino/catalog
+      - ./trino/coordinator/etc:/etc/trino:ro
 
+  worker0:
+    image: trinodb/trino:457
+    container_name: worker0
+    networks:
+      flight_net:
+    volumes:
+      - ./trino/worker/etc:/etc/trino:ro
+
+  worker1:
+    image: trinodb/trino:457
+    container_name: worker1
+    networks:
+      flight_net:
+    volumes:
+      - ./trino/worker/etc:/etc/trino:ro
+
+  # Hive metastore
   hive-metastore-postgresql:
     image: bde2020/hive-metastore-postgresql:2.3.0
     container_name: hive-metastore-postgresql
@@ -323,8 +502,12 @@ volumes:
   zookeeper_secrets:
   zookeeper_data:
   zookeeper_log:
-  kafka_secrets:
-  kafka_data:
+  kafka_secrets_1:
+  kafka_data_1:
+  kafka_secrets_2:
+  kafka_data_2:
+  kafka_secrets_3:
+  kafka_data_3:
   postgres_db_volume:
   airflow_logs:
   airflow_plugins:

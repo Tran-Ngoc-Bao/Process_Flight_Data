@@ -8,7 +8,7 @@ import os
 default_args = {
     "owner": "airflow",
     "depends_on_past": False,
-    "start_date": "2024-11-28 13:30:00",
+    "start_date": "2017-12-3 00:00:00",
     "email": ["airflow@airflow.com"],
     "email_on_failure": False,
     "email_on_retry": False,
@@ -16,7 +16,7 @@ default_args = {
     "retry_delay": timedelta(minutes=1),
 }
 
-dag = DAG("query", default_args=default_args, schedule_interval="*/2 * * * *", max_active_runs=1)
+dag = DAG("query", default_args=default_args, schedule_interval="0 0 1 * *", max_active_runs=1)
 
 year = 2030
 month = 1
@@ -60,7 +60,7 @@ def query_data_def():
         with open(f'/opt/airflow/sql/month/month_{year}_{month}.sql', 'w') as f:
             f.write(string_replace)
 
-        os.system(f'cd /opt/airflow/source && ./trino --server http://trino:8080 --file /opt/airflow/sql/month/month_{year}_{month}.sql')
+        os.system(f'cd /opt/airflow/source && ./trino --server http://coordinator:8080 --file /opt/airflow/sql/month/month_{year}_{month}.sql')
 
         if month % 3 == 0:
             string = ''
@@ -72,7 +72,7 @@ def query_data_def():
             with open(f'/opt/airflow/sql/quarter/quarter_{year}_{quarter}.sql', 'w') as f:
                 f.write(string_replace)
             
-            os.system(f'cd /opt/airflow/source && ./trino --server http://trino:8080 --file /opt/airflow/sql/quarter/quarter_{year}_{quarter}.sql')
+            os.system(f'cd /opt/airflow/source && ./trino --server http://coordinator:8080 --file /opt/airflow/sql/quarter/quarter_{year}_{quarter}.sql')
 
             if month % 12 == 0:
                 string = ''
@@ -83,7 +83,7 @@ def query_data_def():
                 with open(f'/opt/airflow/sql/year/year_{year}.sql', 'w') as f:
                     f.write(string_replace)
                 
-                os.system(f'cd /opt/airflow/source && ./trino --server http://trino:8080 --file /opt/airflow/sql/year/year_{year}.sql')
+                os.system(f'cd /opt/airflow/source && ./trino --server http://coordinator:8080 --file /opt/airflow/sql/year/year_{year}.sql')
 
 query_data = PythonOperator(
     task_id="query_data",

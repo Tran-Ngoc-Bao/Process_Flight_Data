@@ -11,7 +11,7 @@ import os
 default_args = {
     "owner": "airflow",
     "depends_on_past": False,
-    "start_date": "2025-01-01 15:00:00",
+    "start_date": "2017-12-31 00:00:00",
     "email": ["airflow@airflow.com"],
     "email_on_failure": False,
     "email_on_retry": False,
@@ -19,7 +19,7 @@ default_args = {
     "retry_delay": timedelta(minutes=1),
 }
 
-dag = DAG("data_flow", default_args=default_args, schedule_interval="*/15 * * * *", max_active_runs=1)
+dag = DAG("data_flow", default_args=default_args, schedule_interval="0 0 1 * *", max_active_runs=1)
 
 year = 2030
 month = 1
@@ -62,7 +62,7 @@ def extract_data_def():
     producer = Producer(config)
 
     topic = f'flight_data_{year}'
-    url = 'http://data-source:5000/api/get_data'
+    url = 'http://service:5000/api/get_data'
     params = {'year': year, 'month': month, 'offset': 0, 'limit': 100}
 
     while True:
@@ -101,7 +101,7 @@ def query_data_def():
     with open(f'/opt/airflow/sql/month/month_{year}_{month}.sql', 'w') as f:
         f.write(string_replace)
 
-    os.system(f'cd /opt/airflow/source && ./trino --server http://trino:8080 --file /opt/airflow/sql/month/month_{year}_{month}.sql')
+    os.system(f'cd /opt/airflow/source && ./trino --server http://coordinator:8080 --file /opt/airflow/sql/month/month_{year}_{month}.sql')
 
     if month % 3 == 0:
         string = ''
@@ -113,7 +113,7 @@ def query_data_def():
         with open(f'/opt/airflow/sql/quarter/quarter_{year}_{quarter}.sql', 'w') as f:
             f.write(string_replace)
         
-        os.system(f'cd /opt/airflow/source && ./trino --server http://trino:8080 --file /opt/airflow/sql/quarter/quarter_{year}_{quarter}.sql')
+        os.system(f'cd /opt/airflow/source && ./trino --server http://coordinator:8080 --file /opt/airflow/sql/quarter/quarter_{year}_{quarter}.sql')
 
         if month % 12 == 0:
             string = ''
@@ -124,7 +124,7 @@ def query_data_def():
             with open(f'/opt/airflow/sql/year/year_{year}.sql', 'w') as f:
                 f.write(string_replace)
             
-            os.system(f'cd /opt/airflow/source && ./trino --server http://trino:8080 --file /opt/airflow/sql/year/year_{year}.sql')
+            os.system(f'cd /opt/airflow/source && ./trino --server http://coordinator:8080 --file /opt/airflow/sql/year/year_{year}.sql')
 
 extract_data = PythonOperator(
     task_id="extract_data",

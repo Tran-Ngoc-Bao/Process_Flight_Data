@@ -18,7 +18,7 @@
 ## Deploy system
 #### 1. Should pull and build images before
 ```sh
-docker pull confluentinc/cp-zookeeper confluentinc/cp-kafka provectuslabs/kafka-ui postgres bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8 bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8 bde2020/hadoop-resourcemanager:2.0.0-hadoop3.2.1-java8 bde2020/hadoop-nodemanager:2.0.0-hadoop3.2.1-java8 bde2020/hadoop-historyserver:2.0.0-hadoop3.2.1-java8
+docker pull confluentinc/cp-zookeeper confluentinc/cp-kafka provectuslabs/kafka-ui postgres bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8 bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8 bde2020/hadoop-resourcemanager:2.0.0-hadoop3.2.1-java8 bde2020/hadoop-nodemanager:2.0.0-hadoop3.2.1-java8 bde2020/hive:2.3.2-postgresql-metastore bde2020/hive-metastore-postgresql:2.3.0 trinodb/trino:457
 ```
 ```sh
 docker build ./airflow -t airflow
@@ -61,16 +61,16 @@ https://www.kaggle.com/datasets/robikscube/flight-delay-dataset-20182022/data?se
 ./superset/bootstrap-superset.sh
 ```
   
-#### 7. Visualize data on Superset with SQLalchemy uri
+#### 7. Visualize data on Superset with SQLalchemy URI
 ```
 trino://hive@trino:8080/hive
 ```
 
-## Demo Output
-### Analysis of Day of Month
+## Demo output
+### Analysis of day of month
   <img style="width:80%;" src="https://github.com/Tran-Ngoc-Bao/Process_Flight_Data/blob/master/pictures/charts/ngay-trong-thang-2024-12-01T02-17-37.154Z.jpg">
 
-### Analysis of Month of Year
+### Analysis of month of year
   <img style="width:80%;" src="https://github.com/Tran-Ngoc-Bao/Process_Flight_Data/blob/master/pictures/charts/số-chuyến-bay-theo-thang-qua-cac-nam-2024-12-01T13-13-34.441Z.jpg">
 
 ## Report

@@ -7,7 +7,7 @@ from pyspark.sql import SparkSession
 default_args = {
     "owner": "airflow",
     "depends_on_past": False,
-    "start_date": "2024-11-28 13:30:00",
+    "start_date": "2017-12-31 00:00:00",
     "email": ["airflow@airflow.com"],
     "email_on_failure": False,
     "email_on_retry": False,
@@ -15,7 +15,7 @@ default_args = {
     "retry_delay": timedelta(minutes=1),
 }
 
-dag = DAG("transform", default_args=default_args, schedule_interval="*/2 * * * *", max_active_runs=1)
+dag = DAG("transform", default_args=default_args, schedule_interval="0 0 1 * *", max_active_runs=1)
 
 year = 2030
 month = 1

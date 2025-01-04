@@ -89,11 +89,11 @@
   </property>
   <property>
     <name>yarn.nodemanager.resource.memory-mb</name>
-    <value>16384</value>
+    <value>4096</value>
   </property>
   <property>
     <name>yarn.nodemanager.resource.cpu-vcores</name>
-    <value>8</value>
+    <value>3</value>
   </property>
   <property>
     <name>yarn.nodemanager.disk-health-checker.max-disk-utilization-per-disk-percentage</name>

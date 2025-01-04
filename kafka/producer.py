@@ -16,7 +16,7 @@ def solution():
     producer = Producer(config)
 
     topic = f'flight_data_{year}'
-    url = 'http://data-source:5000/api/get_data'
+    url = 'http://service:5000/api/get_data'
     params = {'year': year, 'month': month, 'offset': 0, 'limit': 100}
 
     while True:
