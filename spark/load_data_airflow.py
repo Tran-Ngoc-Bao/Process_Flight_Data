@@ -19,7 +19,7 @@ if __name__ == "__main__":
     else:
         df = spark.readStream \
             .format("kafka") \
-            .option("kafka.bootstrap.servers", "broker01:9093") \
+            .option("kafka.bootstrap.servers", "broker01:9092") \
             .option("subscribe", f"flight_data_{year}") \
             .load()
         
@@ -160,7 +160,8 @@ if __name__ == "__main__":
         def stop_query():
             writing_df.stop()
 
-        timer = threading.Timer(10 * 60, stop_query)
+        # timer = threading.Timer(24 * 60 * 60, stop_query)
+        timer = threading.Timer(3 * 60, stop_query)
         timer.start()
 
         writing_df.awaitTermination()

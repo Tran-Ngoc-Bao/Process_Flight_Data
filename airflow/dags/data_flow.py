@@ -58,7 +58,7 @@ def extract_data_def():
     global year
     global month
 
-    config = {'bootstrap.servers': 'broker01:9093', 'acks': 'all'}
+    config = {'bootstrap.servers': 'broker01:9092', 'acks': 'all'}
     producer = Producer(config)
 
     topic = f'flight_data_{year}'
@@ -81,6 +81,9 @@ def extract_data_def():
                 
                 if data['status'] == 'complete':
                     break
+
+                # if params['offset'] == 10000:
+                #     break
 
                 params['offset'] += 100
         except Exception as e:
@@ -155,5 +158,35 @@ query_data = PythonOperator(
     python_callable=query_data_def,
     dag=dag
 )
+
+# extract_data = BashOperator(
+#     task_id="extract_data",
+#     bash_command=f"sleep 60",
+#     dag=dag
+# )
+
+# load_data = BashOperator(
+#     task_id="load_data",
+#     bash_command=f"sleep 60",
+#     dag=dag
+# )
+
+# transform_data = BashOperator(
+#     task_id="transform_data",
+#     bash_command=f"sleep 60",
+#     dag=dag
+# )
+
+# increase_time = BashOperator(
+#     task_id="increase_time",
+#     bash_command=f"sleep 60",
+#     dag=dag
+# )
+
+# query_data = BashOperator(
+#     task_id="query_data",
+#     bash_command=f"sleep 10",
+#     dag=dag
+# )
 
 [extract_data, load_data] >> transform_data >> query_data >> increase_time

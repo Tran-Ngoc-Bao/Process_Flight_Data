@@ -18,7 +18,7 @@
 ## Deploy system
 #### 1. Should pull and build images before
 ```sh
-docker pull confluentinc/cp-zookeeper confluentinc/cp-kafka provectuslabs/kafka-ui postgres bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8 bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8 bde2020/hadoop-resourcemanager:2.0.0-hadoop3.2.1-java8 bde2020/hadoop-nodemanager:2.0.0-hadoop3.2.1-java8 bde2020/hive:2.3.2-postgresql-metastore bde2020/hive-metastore-postgresql:2.3.0 trinodb/trino:457
+docker pull confluentinc/cp-zookeeper confluentinc/cp-kafka provectuslabs/kafka-ui postgres bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8 bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8 bde2020/hadoop-resourcemanager:2.0.0-hadoop3.2.1-java8 bde2020/hadoop-nodemanager:2.0.0-hadoop3.2.1-java8 bde2020/hadoop-historyserver:2.0.0-hadoop3.2.1-java8 bde2020/hive:2.3.2-postgresql-metastore bde2020/hive-metastore-postgresql:2.3.0 trinodb/trino:457
 ```
 ```sh
 docker build ./airflow -t airflow

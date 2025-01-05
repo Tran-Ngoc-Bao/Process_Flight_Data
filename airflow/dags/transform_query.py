@@ -8,7 +8,7 @@ import os
 default_args = {
     "owner": "airflow",
     "depends_on_past": False,
-    "start_date": "2017-12-3 00:00:00",
+    "start_date": "2025-01-05 05:00:00",
     "email": ["airflow@airflow.com"],
     "email_on_failure": False,
     "email_on_retry": False,
@@ -16,7 +16,7 @@ default_args = {
     "retry_delay": timedelta(minutes=1),
 }
 
-dag = DAG("query", default_args=default_args, schedule_interval="0 0 1 * *", max_active_runs=1)
+dag = DAG("transform_query", default_args=default_args, schedule_interval="*/5 * * * *", max_active_runs=1)
 
 year = 2030
 month = 1
@@ -85,6 +85,12 @@ def query_data_def():
                 
                 os.system(f'cd /opt/airflow/source && ./trino --server http://coordinator:8080 --file /opt/airflow/sql/year/year_{year}.sql')
 
+transform_data = BashOperator(
+    task_id="transform_data",
+    bash_command=f"source /opt/airflow/source/env.sh && spark-submit /opt/airflow/spark/transform_data_airflow.py {year} {month}",
+    dag=dag
+)
+
 query_data = PythonOperator(
     task_id="query_data",
     python_callable=query_data_def,
@@ -97,4 +103,4 @@ increase_time = PythonOperator(
     dag=dag
 )
 
-query_data >> increase_time
+transform_data >> query_data >> increase_time
