@@ -68,10 +68,10 @@ trino://hive@trino:8080/hive
 
 ## Demo output
 ### Analysis of day of month
-  <img style="width:80%;" src="https://github.com/Tran-Ngoc-Bao/Process_Flight_Data/blob/master/pictures/charts/ngay-trong-thang-2024-12-01T02-17-37.154Z.jpg">
+  <img src="https://github.com/Tran-Ngoc-Bao/Process_Flight_Data/blob/master/pictures/charts/phan-ph%E1%BB%91i-m%E1%BA%A1ng-l%C6%B0%E1%BB%9Bi-ti%E1%BA%BFp-th%E1%BB%8B-hang-khong-2024-11-30T14-42-52.691Z.jpg">
 
 ### Analysis of month of year
-  <img style="width:80%;" src="https://github.com/Tran-Ngoc-Bao/Process_Flight_Data/blob/master/pictures/charts/số-chuyến-bay-theo-thang-qua-cac-nam-2024-12-01T13-13-34.441Z.jpg">
+  <img src="https://github.com/Tran-Ngoc-Bao/Process_Flight_Data/blob/master/pictures/charts/d%E1%BB%99-tr%E1%BB%85-trung-binh-theo-hang-hang-khong-2024-11-30T15-13-50.328Z.jpg">
 
 ## Report
 <ul>
