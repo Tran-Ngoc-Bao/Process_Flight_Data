@@ -189,14 +189,14 @@ services:
     restart: on-failure
     command:
       - -c
-      - airflow users list || ( airflow db init &&
+      - airflow db init &&
         airflow users create
           --role Admin
           --username airflow
           --password airflow
           --email airflow@airflow.com
           --firstname airflow
-          --lastname airflow )
+          --lastname airflow
 
   airflow-webserver:
     << : *airflow-common
