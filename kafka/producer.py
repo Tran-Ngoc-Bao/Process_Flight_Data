@@ -12,7 +12,7 @@ def solution():
     global year
     global month
 
-    config = {'bootstrap.servers': 'broker:9093', 'acks': 'all'}
+    config = {'bootstrap.servers': 'kafka-0:9092, kafka-1:9092, kafka-2:9092', 'acks': 'all'}
     producer = Producer(config)
 
     topic = f'flight_data_{year}'

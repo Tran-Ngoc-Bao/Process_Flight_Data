@@ -19,7 +19,7 @@ if __name__ == "__main__":
     else:
         df = spark.readStream \
             .format("kafka") \
-            .option("kafka.bootstrap.servers", "broker01:9092") \
+            .option("kafka.bootstrap.servers", "kafka-0:9092, kafka-1:9092, kafka-2:9092") \
             .option("subscribe", f"flight_data_{year}") \
             .load()
         

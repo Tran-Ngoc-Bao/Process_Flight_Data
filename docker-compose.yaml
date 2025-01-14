@@ -62,15 +62,17 @@ services:
       - zookeeper_log:/var/lib/zookeeper/log
   
   broker01:
+  # kafka-0:
     image: confluentinc/cp-kafka
     container_name: broker01
+    # container_name: kafka-0
     depends_on:
       zookeeper:
         condition: service_healthy
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT_HOST://localhost:28092,PLAINTEXT://broker01:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT_HOST://localhost:28092,PLAINTEXT://kafka-0:9092
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_JMX_PORT: 9090
@@ -83,7 +85,7 @@ services:
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 100
       CONFLUENT_METRICS_ENABLE: 'false'
     ports:
-      - 28092:28092
+      - 28092:9092
     networks:
       flight_net:
     volumes:
@@ -92,15 +94,17 @@ services:
       - kafka_data_1:/var/lib/kafka/data
 
   broker02:
+  # kafka-1:
     image: confluentinc/cp-kafka
     container_name: broker02
+    # container_name: kafka-1
     depends_on:
       zookeeper:
         condition: service_healthy
     environment:
       KAFKA_BROKER_ID: 2
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT_HOST://localhost:29092,PLAINTEXT://broker02:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT_HOST://localhost:29092,PLAINTEXT://kafka-1:9092
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_JMX_PORT: 9090
@@ -113,7 +117,7 @@ services:
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 100
       CONFLUENT_METRICS_ENABLE: 'false'
     ports:
-      - 29092:29092
+      - 29092:9092
     networks:
       flight_net:
     volumes:
@@ -122,15 +126,17 @@ services:
       - kafka_data_2:/var/lib/kafka/data
 
   broker03:
+  # kafka-2:
     image: confluentinc/cp-kafka
     container_name: broker03
+    # container_name: kafka-2
     depends_on:
       zookeeper:
         condition: service_healthy
     environment:
       KAFKA_BROKER_ID: 3
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT_HOST://localhost:30092,PLAINTEXT://broker03:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT_HOST://localhost:30092,PLAINTEXT://kafka-2:9092
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_JMX_PORT: 9090
@@ -143,7 +149,7 @@ services:
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 100
       CONFLUENT_METRICS_ENABLE: 'false'
     ports:
-      - 30092:30092
+      - 30092:9092
     networks:
       flight_net:
     volumes:
@@ -159,7 +165,7 @@ services:
         condition: service_healthy
     environment:
       KAFKA_CLUSTERS_0_NAME: kafka
-      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: broker02:9092
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka-0:9092,kafka-1:9092,kafka-2:9092
       KAFKA_CLUSTERS_0_METRICS_PORT: 9090
     ports:
       - 8282:8080
@@ -389,20 +395,24 @@ volumes:
   zookeeper_secrets:
   zookeeper_data:
   zookeeper_log:
+
   kafka_secrets_1:
   kafka_data_1:
   kafka_secrets_2:
   kafka_data_2:
   kafka_secrets_3:
   kafka_data_3:
+
   postgres_db_volume:
   airflow_logs:
   airflow_plugins:
   airflow_scripts:
+
   hadoop_namenode:
   hadoop_datanode01:
   hadoop_datanode02:
   hadoop_datanode03:
   hadoop_historyserver:
+
   hive_metastore_postgresql:
   superset_data:
