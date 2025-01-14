@@ -50,7 +50,7 @@ def solution():
         month += 1
 
 if __name__ == "__main__":
-    year = 2019
+    year = 2018
     month = 1
 
     # flag = True

@@ -63,7 +63,7 @@ https://www.kaggle.com/datasets/robikscube/flight-delay-dataset-20182022/data?se
   
 #### 7. Visualize data on Superset with SQLalchemy URI
 ```
-trino://hive@trino:8080/hive
+trino://hive@coordinator:8080/hive
 ```
 
 ## Demo output

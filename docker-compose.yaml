@@ -61,11 +61,9 @@ services:
       - zookeeper_data:/var/lib/zookeeper/data
       - zookeeper_log:/var/lib/zookeeper/log
   
-  broker01:
-  # kafka-0:
+  kafka-0:
     image: confluentinc/cp-kafka
-    container_name: broker01
-    # container_name: kafka-0
+    container_name: kafka-0
     depends_on:
       zookeeper:
         condition: service_healthy
@@ -93,11 +91,9 @@ services:
       - kafka_secrets_1:/etc/kafka/secrets
       - kafka_data_1:/var/lib/kafka/data
 
-  broker02:
-  # kafka-1:
+  kafka-1:
     image: confluentinc/cp-kafka
-    container_name: broker02
-    # container_name: kafka-1
+    container_name: kafka-1
     depends_on:
       zookeeper:
         condition: service_healthy
@@ -125,11 +121,9 @@ services:
       - kafka_secrets_2:/etc/kafka/secrets
       - kafka_data_2:/var/lib/kafka/data
 
-  broker03:
-  # kafka-2:
+  kafka-2:
     image: confluentinc/cp-kafka
-    container_name: broker03
-    # container_name: kafka-2
+    container_name: kafka-2
     depends_on:
       zookeeper:
         condition: service_healthy
@@ -160,9 +154,6 @@ services:
   kafka-ui:
     image: provectuslabs/kafka-ui
     container_name: kafka-ui
-    depends_on:
-      broker01:
-        condition: service_healthy
     environment:
       KAFKA_CLUSTERS_0_NAME: kafka
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka-0:9092,kafka-1:9092,kafka-2:9092
